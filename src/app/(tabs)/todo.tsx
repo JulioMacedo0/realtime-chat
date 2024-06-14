@@ -12,13 +12,14 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { supabase } from "@/supabase/supabase";
+import { Database } from "@/supabase/Tsupabase";
+import { TodoCard } from "@/components/TodoCard";
 
-interface Todo {
-  id: number;
-  title: string;
-  completed: boolean;
-  created_at: string;
-}
+export interface Todo
+  extends Pick<
+    Database["public"]["Tables"]["todos"]["Row"],
+    "title" | "completed" | "created_at" | "id"
+  > {}
 
 export default function TodoListPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -31,7 +32,7 @@ export default function TodoListPage() {
 
   const fetchTodos = async () => {
     const { data, error } = await supabase
-      .from<Todo>("todos")
+      .from("todos")
       .select("*")
       .order("created_at", { ascending: true });
 
@@ -39,8 +40,9 @@ export default function TodoListPage() {
       console.error(error);
       return;
     }
+    if (!data) return;
 
-    setTodos(data || []);
+    setTodos(data);
   };
 
   const addTodo = async () => {
@@ -64,6 +66,7 @@ export default function TodoListPage() {
   };
 
   const updateTodo = async () => {
+    if (!editingTodoId) return;
     const { error } = await supabase
       .from("todos")
       .update({ title: newTodo })
@@ -90,7 +93,10 @@ export default function TodoListPage() {
     fetchTodos();
   };
 
-  const toggleTodoCompletion = async (id: number, completed: boolean) => {
+  const toggleTodoCompletion = async (
+    id: number,
+    completed: boolean | null
+  ) => {
     const { error } = await supabase
       .from("todos")
       .update({ completed: !completed })
@@ -104,19 +110,7 @@ export default function TodoListPage() {
     fetchTodos();
   };
 
-  const renderItem = ({ item }: { item: Todo }) => (
-    <ThemedView style={styles.todoContainer}>
-      <TouchableOpacity
-        onPress={() => toggleTodoCompletion(item.id, item.completed)}
-      >
-        <ThemedText style={{ color: item.completed ? "#aaa" : "#000" }}>
-          {item.title}
-        </ThemedText>
-      </TouchableOpacity>
-      <Button title="Edit" onPress={() => editTodo(item)} />
-      <Button title="Delete" onPress={() => deleteTodo(item.id)} />
-    </ThemedView>
-  );
+  const renderItem = ({ item }: { item: Todo }) => <TodoCard todo={item} />;
 
   const editTodo = (todo: Todo) => {
     setNewTodo(todo.title);

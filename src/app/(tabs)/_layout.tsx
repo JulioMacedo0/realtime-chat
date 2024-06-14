@@ -11,6 +11,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme ?? "light"].tabBarBackground,
+        },
+        headerStyle: {
+          backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+        },
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: true,
       }}
@@ -35,6 +41,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "code-slash" : "code-slash-outline"}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="todo"
+        options={{
+          title: "todo",
+          headerTitleAlign: "center",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "book" : "book-outline"}
               color={color}
             />
           ),
