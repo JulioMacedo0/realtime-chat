@@ -7,6 +7,9 @@ import {
   View,
   Image,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  useWindowDimensions,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
@@ -14,12 +17,13 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { supabase } from "@/supabase/supabase";
 import * as Device from "expo-device";
+import { Screen } from "@/components";
 
 export default function HomeScreen() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
 
-  const [uploading, setUploading] = useState(false);
+  const { height } = useWindowDimensions();
 
   useEffect(() => {
     const channel = supabase
@@ -46,56 +50,6 @@ export default function HomeScreen() {
     });
     setNewMessage("");
   };
-
-  async function uploadPhoto() {
-    try {
-      setUploading(true);
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // Restrict to only images
-        allowsMultipleSelection: false, // Can only select one image
-        allowsEditing: true, // Allows the user to crop / rotate their photo before uploading it
-        quality: 1,
-        exif: false, // We don't want nor need that data.
-      });
-
-      if (result.canceled || !result.assets || result.assets.length === 0) {
-        console.log("User cancelled image picker.");
-        return;
-      }
-
-      const image = result.assets[0];
-      console.log("Got image", image);
-
-      if (!image.uri) {
-        throw new Error("No image uri!"); // Realistically, this should never happen, but just in case...
-      }
-
-      const arraybuffer = await fetch(image.uri).then((res) =>
-        res.arrayBuffer()
-      );
-
-      const fileExt = image.uri?.split(".").pop()?.toLowerCase() ?? "jpeg";
-      const path = `${Date.now()}.${fileExt}`;
-      const { data, error: uploadError } = await supabase.storage
-        .from("test")
-        .upload(path, arraybuffer, {
-          contentType: image.mimeType ?? "image/jpeg",
-        });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      } else {
-        throw error;
-      }
-    } finally {
-      setUploading(false);
-    }
-  }
 
   const renderItem = ({ item }) => (
     <ThemedView style={styles.messageContainer}>
@@ -124,12 +78,12 @@ export default function HomeScreen() {
   );
 
   return (
-    <ThemedView style={styles.container}>
+    <Screen>
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item, index) => index.toString()}
-        style={styles.messageList}
+        style={[styles.messageList]}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -140,16 +94,13 @@ export default function HomeScreen() {
         />
         <Button title="Send" onPress={sendMessage} />
       </View>
-      <Button title="Pick an image from camera roll" onPress={uploadPhoto} />
-    </ThemedView>
+
+      {/* <Button title="Pick an image from camera roll" onPress={uploadPhoto} /> */}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
   title: {
     marginBottom: 16,
     textAlign: "center",
