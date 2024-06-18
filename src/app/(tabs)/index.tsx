@@ -11,14 +11,24 @@ import {
   Platform,
   useWindowDimensions,
   ListRenderItemInfo,
+  useColorScheme,
+  Pressable,
+  GestureResponderEvent,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
+import Animated from "react-native-reanimated";
 import * as Crypto from "expo-crypto";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { supabase } from "@/supabase/supabase";
 import * as Device from "expo-device";
 import { Screen } from "@/components";
+import { Colors } from "@/constants/Colors";
+import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 type Message = {
   id: string;
@@ -36,7 +46,23 @@ export default function HomeScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
-  const { height } = useWindowDimensions();
+  const colorScheme = useColorScheme();
+
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
+  const onPressIn = () => {
+    scale.value = withSpring(2, {});
+  };
+
+  const onPressOut = () => {
+    scale.value = withSpring(1, {});
+  };
 
   useEffect(() => {
     const channel = supabase
@@ -90,7 +116,7 @@ export default function HomeScreen() {
       </ThemedText>
     </ThemedView>
   );
-
+  const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
   return (
     <Screen>
       <FlatList
@@ -99,14 +125,43 @@ export default function HomeScreen() {
         keyExtractor={(item, index) => item.id}
         style={[styles.messageList]}
       />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={newMessage}
-          onChangeText={setNewMessage}
-          placeholder="Type a message"
-        />
-        <Button title="Send" onPress={sendMessage} />
+      <View style={[styles.inputContainer, {}]}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+
+            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+            borderRadius: 28,
+            borderColor: "#ccc",
+            borderWidth: 1,
+          }}
+        >
+          <TextInput
+            style={[styles.input, {}]}
+            value={newMessage}
+            onChangeText={setNewMessage}
+            placeholder="Type a message"
+          />
+        </View>
+        {/* <Button title="Send" onPress={sendMessage} /> */}
+        <AnimatedPressable
+          onPressIn={onPressIn}
+          onPressOut={onPressOut}
+          style={[
+            {
+              backgroundColor: "#00af00",
+              padding: 8,
+              borderRadius: 999,
+              justifyContent: "center",
+              alignItems: "center",
+            },
+            animatedStyle,
+          ]}
+        >
+          <TabBarIcon name="mic" color="#fff" />
+        </AnimatedPressable>
       </View>
 
       {/* <Button title="Pick an image from camera roll" onPress={uploadPhoto} /> */}
@@ -133,19 +188,11 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 4,
   },
   input: {
     flex: 1,
-    borderColor: "#ccc",
-    color: "#fff",
-    borderWidth: 1,
-    borderRadius: 5,
+
     padding: 8,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    marginTop: 10,
   },
 });
