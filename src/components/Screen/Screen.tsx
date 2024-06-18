@@ -30,7 +30,7 @@ export function Screen({ children }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 6,
   },
   flex: {
     flex: 1,
