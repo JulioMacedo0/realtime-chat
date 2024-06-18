@@ -10,17 +10,30 @@ import {
   KeyboardAvoidingView,
   Platform,
   useWindowDimensions,
+  ListRenderItemInfo,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-
+import * as Crypto from "expo-crypto";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { supabase } from "@/supabase/supabase";
 import * as Device from "expo-device";
 import { Screen } from "@/components";
 
+type Message = {
+  id: string;
+  content: string;
+  user: string;
+};
+
+type BroadcastPayload = {
+  event: string;
+  payload: Message;
+  type: string;
+};
+
 export default function HomeScreen() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
   const { height } = useWindowDimensions();
@@ -28,7 +41,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const channel = supabase
       .channel("public:chat")
-      .on("broadcast", { event: "message" }, (payload) => {
+      .on("broadcast", { event: "message" }, (payload: BroadcastPayload) => {
         console.log(payload);
         setMessages((currentMessages) => [...currentMessages, payload.payload]);
       })
@@ -44,6 +57,7 @@ export default function HomeScreen() {
       type: "broadcast",
       event: "message",
       payload: {
+        id: Crypto.randomUUID(),
         content: newMessage,
         user: Device.deviceName,
       },
@@ -51,7 +65,7 @@ export default function HomeScreen() {
     setNewMessage("");
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: ListRenderItemInfo<Message>) => (
     <ThemedView style={styles.messageContainer}>
       <ThemedText
         style={{
@@ -82,7 +96,7 @@ export default function HomeScreen() {
       <FlatList
         data={messages}
         renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => item.id}
         style={[styles.messageList]}
       />
       <View style={styles.inputContainer}>
