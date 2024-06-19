@@ -23,12 +23,15 @@ import {
   GestureDetector,
   Gesture,
   GestureHandlerRootView,
+  GestureUpdateEvent,
+  PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
 import {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { AnimatedView } from "react-native-reanimated/lib/typescript/reanimated2/component/View";
 
 type Message = {
   id: string;
@@ -47,25 +50,38 @@ type ContextType = {
   startY: number;
 };
 
+type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
+
 export default function HomeScreen() {
+  function clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  }
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
   const colorScheme = useColorScheme();
 
   const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
 
-  const MAX_TRANSLATE_X = 100; // Limite máximo de arrasto no eixo X
-  const MAX_TRANSLATE_Y = 100; // Limite máximo de arrasto no eixo Y
+  const translationX = useSharedValue(0);
+  const translationY = useSharedValue(0);
+  const prevTranslationX = useSharedValue(0);
+  const prevTranslationY = useSharedValue(0);
+  const startX = useSharedValue(0);
+  const startY = useSharedValue(0);
+  const MAX_TRANSLATE_X = 200; // Limite máximo de arrasto no eixo X
+  const MAX_TRANSLATE_Y = 200; // Limite máximo de arrasto no eixo Y
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const animatedPressableStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+  const animatedViewStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { scale: scale.value },
-        { translateX: translateX.value },
-        { translateY: translateY.value },
+        { translateX: translationX.value },
+        { translateY: translationY.value },
       ],
     };
   });
@@ -116,82 +132,87 @@ export default function HomeScreen() {
   };
 
   const panGesture = Gesture.Pan()
+    .enabled(true)
+    .minDistance(1)
     .onBegin(() => {
-      scale.value = withSpring(2.2, {
-        damping: 8,
-        stiffness: 150,
-      });
+      // scale.value = withSpring(2.2, {
+      //   damping: 8,
+      //   stiffness: 150,
+      // });
+    })
+    .onStart((event) => {
+      prevTranslationX.value = translationX.value;
+      prevTranslationY.value = translationY.value;
     })
     .onUpdate((event) => {
-      console.log(event);
-      translateX.value = Math.min(event.translationX, MAX_TRANSLATE_X);
-      translateY.value = Math.max(event.translationY, -MAX_TRANSLATE_Y);
-      // if (event.translationX > 0 && event.translationY <= 10) {
-      //   // Permite apenas arrastar para a direita
-      //   translateX.value = Math.min(event.translationX, MAX_TRANSLATE_X);
-      //   translateY.value = 0;
-      // } else if (event.translationY < 0 && event.translationX <= 10) {
-      //   // Permite apenas arrastar para cima
-      //   translateY.value = Math.max(event.translationY, -MAX_TRANSLATE_Y);
-      //   translateX.value = 0;
-      // }
+      const maxTranslateX = MAX_TRANSLATE_X;
+      const maxTranslateY = MAX_TRANSLATE_Y;
 
-      // if (
-      //   translateX.value === MAX_TRANSLATE_X ||
-      //   translateY.value === -MAX_TRANSLATE_Y
-      // ) {
-      //   runOnJS(onMaxReached)();
-      // }
+      const nextTranslateX = event.translationX;
+      const nextTranslateY = event.translationY;
+
+      // Verifica se o próximo valor ultrapassa os limites
+      if (
+        Math.abs(nextTranslateX) >= maxTranslateX ||
+        Math.abs(nextTranslateY) >= maxTranslateY
+      ) {
+        // runOnJS(onMaxReached)();
+      } else {
+        translationX.value = clamp(
+          nextTranslateX,
+          -maxTranslateX,
+          maxTranslateX
+        );
+        translationY.value = clamp(
+          nextTranslateY,
+          -maxTranslateY,
+          maxTranslateY
+        );
+      }
     })
     .onEnd(() => {
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
+      translationX.value = withSpring(0);
+      translationY.value = withSpring(0);
       scale.value = withSpring(1, {
         damping: 8,
         stiffness: 150,
       });
-    });
+    })
+    .onTouchesUp(() => {
+      translationX.value = withSpring(0);
+      translationY.value = withSpring(0);
+      scale.value = withSpring(1, {
+        damping: 8,
+        stiffness: 150,
+      });
+    })
+    .runOnJS(true);
+
   const renderItem = ({ item }: ListRenderItemInfo<Message>) => (
     <ThemedView style={styles.messageContainer}>
-      <ThemedText
-        style={{
-          color: "#000",
-        }}
-      >
-        {item.user}
-      </ThemedText>
-      <ThemedText
-        style={{
-          color: "#000",
-        }}
-      >
-        -
-      </ThemedText>
-      <ThemedText
-        style={{
-          color: "#000",
-        }}
-      >
-        {item.content}
-      </ThemedText>
+      <ThemedText style={{ color: "#000" }}>{item.user}</ThemedText>
+      <ThemedText style={{ color: "#000" }}>-</ThemedText>
+      <ThemedText style={{ color: "#000" }}>{item.content}</ThemedText>
     </ThemedView>
   );
+
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
   return (
     <Screen>
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item, index) => item.id}
-        style={[styles.messageList]}
+        style={styles.messageList}
       />
-      <View style={[styles.inputContainer, {}]}>
+
+      <View style={styles.inputContainer}>
         <View
           style={{
             flex: 1,
             flexDirection: "row",
             alignItems: "center",
-
             backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
             borderRadius: 28,
             borderColor: "#ccc",
@@ -199,36 +220,35 @@ export default function HomeScreen() {
           }}
         >
           <TextInput
-            style={[styles.input, {}]}
+            style={styles.input}
             value={newMessage}
             onChangeText={setNewMessage}
             placeholder="Type a message"
           />
         </View>
-        {/* <Button title="Send" onPress={sendMessage} /> */}
 
         <GestureDetector gesture={panGesture}>
-          <AnimatedPressable
-            hitSlop={20}
-            onLongPress={onPressIn}
-            onPressOut={onPressOut}
-            style={[
-              {
-                backgroundColor: "#00af00",
-                padding: 8,
-                borderRadius: 999,
-                justifyContent: "center",
-                alignItems: "center",
-              },
-              animatedStyle,
-            ]}
-          >
-            <TabBarIcon name="mic" color="#fff" />
-          </AnimatedPressable>
+          <Animated.View style={animatedViewStyle}>
+            <AnimatedPressable
+              hitSlop={20}
+              onPressIn={onPressIn}
+              // onPressOut={onPressOut}
+              style={[
+                {
+                  backgroundColor: "#00af00",
+                  padding: 8,
+                  borderRadius: 999,
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+                animatedPressableStyle,
+              ]}
+            >
+              <TabBarIcon name="mic" color="#fff" />
+            </AnimatedPressable>
+          </Animated.View>
         </GestureDetector>
       </View>
-
-      {/* <Button title="Pick an image from camera roll" onPress={uploadPhoto} /> */}
     </Screen>
   );
 }
@@ -256,7 +276,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-
     padding: 8,
   },
 });
