@@ -3,19 +3,14 @@ import {
   StyleSheet,
   FlatList,
   TextInput,
-  Button,
   View,
-  Image,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  useWindowDimensions,
   ListRenderItemInfo,
   useColorScheme,
   Pressable,
-  GestureResponderEvent,
+  Alert,
 } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, { runOnJS } from "react-native-reanimated";
+
 import * as Crypto from "expo-crypto";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -24,6 +19,11 @@ import * as Device from "expo-device";
 import { Screen } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import {
+  GestureDetector,
+  Gesture,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import {
   useAnimatedStyle,
   useSharedValue,
@@ -42,6 +42,11 @@ type BroadcastPayload = {
   type: string;
 };
 
+type ContextType = {
+  startX: number;
+  startY: number;
+};
+
 export default function HomeScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -49,19 +54,34 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
 
   const scale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+
+  const MAX_TRANSLATE_X = 100; // Limite máximo de arrasto no eixo X
+  const MAX_TRANSLATE_Y = 100; // Limite máximo de arrasto no eixo Y
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: scale.value }],
+      transform: [
+        { scale: scale.value },
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+      ],
     };
   });
 
   const onPressIn = () => {
-    scale.value = withSpring(2, {});
+    scale.value = withSpring(2.2, {
+      damping: 8, // Controla a quantidade de resistência na mola
+      stiffness: 150, // Controla a rigidez da mola
+    });
   };
 
   const onPressOut = () => {
-    scale.value = withSpring(1, {});
+    scale.value = withSpring(1, {
+      damping: 8, // Controla a quantidade de resistência na mola
+      stiffness: 150, // Controla a rigidez da mola
+    });
   };
 
   useEffect(() => {
@@ -91,6 +111,46 @@ export default function HomeScreen() {
     setNewMessage("");
   };
 
+  const onMaxReached = () => {
+    Alert.alert("Limite máximo atingido!");
+  };
+
+  const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      scale.value = withSpring(2.2, {
+        damping: 8,
+        stiffness: 150,
+      });
+    })
+    .onUpdate((event) => {
+      console.log(event);
+      translateX.value = Math.min(event.translationX, MAX_TRANSLATE_X);
+      translateY.value = Math.max(event.translationY, -MAX_TRANSLATE_Y);
+      // if (event.translationX > 0 && event.translationY <= 10) {
+      //   // Permite apenas arrastar para a direita
+      //   translateX.value = Math.min(event.translationX, MAX_TRANSLATE_X);
+      //   translateY.value = 0;
+      // } else if (event.translationY < 0 && event.translationX <= 10) {
+      //   // Permite apenas arrastar para cima
+      //   translateY.value = Math.max(event.translationY, -MAX_TRANSLATE_Y);
+      //   translateX.value = 0;
+      // }
+
+      // if (
+      //   translateX.value === MAX_TRANSLATE_X ||
+      //   translateY.value === -MAX_TRANSLATE_Y
+      // ) {
+      //   runOnJS(onMaxReached)();
+      // }
+    })
+    .onEnd(() => {
+      translateX.value = withSpring(0);
+      translateY.value = withSpring(0);
+      scale.value = withSpring(1, {
+        damping: 8,
+        stiffness: 150,
+      });
+    });
   const renderItem = ({ item }: ListRenderItemInfo<Message>) => (
     <ThemedView style={styles.messageContainer}>
       <ThemedText
@@ -146,22 +206,26 @@ export default function HomeScreen() {
           />
         </View>
         {/* <Button title="Send" onPress={sendMessage} /> */}
-        <AnimatedPressable
-          onPressIn={onPressIn}
-          onPressOut={onPressOut}
-          style={[
-            {
-              backgroundColor: "#00af00",
-              padding: 8,
-              borderRadius: 999,
-              justifyContent: "center",
-              alignItems: "center",
-            },
-            animatedStyle,
-          ]}
-        >
-          <TabBarIcon name="mic" color="#fff" />
-        </AnimatedPressable>
+
+        <GestureDetector gesture={panGesture}>
+          <AnimatedPressable
+            hitSlop={20}
+            onLongPress={onPressIn}
+            onPressOut={onPressOut}
+            style={[
+              {
+                backgroundColor: "#00af00",
+                padding: 8,
+                borderRadius: 999,
+                justifyContent: "center",
+                alignItems: "center",
+              },
+              animatedStyle,
+            ]}
+          >
+            <TabBarIcon name="mic" color="#fff" />
+          </AnimatedPressable>
+        </GestureDetector>
       </View>
 
       {/* <Button title="Pick an image from camera roll" onPress={uploadPhoto} /> */}
