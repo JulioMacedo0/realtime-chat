@@ -131,6 +131,8 @@ export default function HomeScreen() {
     Alert.alert("Limite máximo atingido!");
   };
 
+  let initialDirection: null | "x" | "y" = null;
+  const TOLERANCE = 10;
   const panGesture = Gesture.Pan()
     .enabled(true)
     .minDistance(1)
@@ -148,8 +150,34 @@ export default function HomeScreen() {
       const maxTranslateX = MAX_TRANSLATE_X;
       const maxTranslateY = MAX_TRANSLATE_Y;
 
-      const nextTranslateX = event.translationX;
-      const nextTranslateY = event.translationY;
+      let nextTranslateX = event.translationX;
+      let nextTranslateY = event.translationY;
+
+      if (initialDirection === null) {
+        if (
+          Math.abs(nextTranslateX) > TOLERANCE ||
+          Math.abs(nextTranslateY) > TOLERANCE
+        ) {
+          if (Math.abs(nextTranslateX) > Math.abs(nextTranslateY)) {
+            initialDirection = "x";
+          } else {
+            initialDirection = "y";
+          }
+        }
+      }
+
+      if (nextTranslateX > 0) {
+        nextTranslateX = 0;
+      }
+      if (nextTranslateY > 0) {
+        nextTranslateY = 0;
+      }
+
+      if (initialDirection === "x") {
+        nextTranslateY = translationY.value; // Manter o valor Y atual
+      } else {
+        nextTranslateX = translationX.value; // Manter o valor X atual
+      }
 
       // Verifica se o próximo valor ultrapassa os limites
       if (
@@ -163,6 +191,7 @@ export default function HomeScreen() {
           -maxTranslateX,
           maxTranslateX
         );
+
         translationY.value = clamp(
           nextTranslateY,
           -maxTranslateY,
@@ -177,6 +206,7 @@ export default function HomeScreen() {
         damping: 8,
         stiffness: 150,
       });
+      initialDirection = null;
     })
     .onTouchesUp(() => {
       translationX.value = withSpring(0);
@@ -185,6 +215,7 @@ export default function HomeScreen() {
         damping: 8,
         stiffness: 150,
       });
+      initialDirection = null;
     })
     .runOnJS(true);
 
