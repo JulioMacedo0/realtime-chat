@@ -10,8 +10,8 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import Animated from "react-native-reanimated";
-import { FontAwesome6 } from "@expo/vector-icons";
+import Animated, { withTiming } from "react-native-reanimated";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import * as Crypto from "expo-crypto";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -32,7 +32,6 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { AnimatedView } from "react-native-reanimated/lib/typescript/reanimated2/component/View";
 
 type Message = {
   id: string;
@@ -57,18 +56,39 @@ type Clamp = {
   max: number;
 };
 
+interface IFormInput {
+  id: string;
+  content: string;
+  user: string | null;
+}
+
 type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
 
 export default function HomeScreen() {
   function clamp({ val, min, max }: Clamp) {
     return Math.min(Math.max(val, min), max);
   }
+
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    defaultValues: {
+      id: Crypto.randomUUID(),
+      content: "",
+      user: Device.deviceName,
+    },
+  });
+
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [hasMessage, setHasmessage] = useState(false);
 
   const colorScheme = useColorScheme();
 
   const scale = useSharedValue(1);
+  const iconOpacity = useSharedValue(0);
 
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
@@ -89,6 +109,12 @@ export default function HomeScreen() {
         { translateX: translationX.value },
         { translateY: translationY.value },
       ],
+    };
+  });
+
+  const animatedIconStyle = useAnimatedStyle(() => {
+    return {
+      opacity: iconOpacity.value,
     };
   });
 
@@ -120,17 +146,12 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const sendMessage = async () => {
+  const sendMessage = async (payload: IFormInput) => {
     await supabase.channel("public:chat").send({
       type: "broadcast",
       event: "message",
-      payload: {
-        id: Crypto.randomUUID(),
-        content: newMessage,
-        user: Device.deviceName,
-      },
+      payload,
     });
-    setNewMessage("");
   };
 
   const onMaxReached = () => {
@@ -242,6 +263,17 @@ export default function HomeScreen() {
 
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    console.log(data);
+    // sendMessage(data);
+  };
+
+  useEffect(() => {
+    iconOpacity.value = withTiming(0, { duration: 200 }, () => {
+      iconOpacity.value = withTiming(1, { duration: 200 });
+    });
+  }, [hasMessage]);
+
   return (
     <Screen>
       <FlatList
@@ -268,12 +300,27 @@ export default function HomeScreen() {
           <TouchableOpacity activeOpacity={0.4}>
             <IconApp lib="FontAwesome6" name="face-laugh" color="#ccc" />
           </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={newMessage}
-            onChangeText={setNewMessage}
-            placeholder="Message"
+
+          <Controller
+            control={control}
+            rules={{
+              required: true,
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={styles.input}
+                placeholder="Message"
+                onBlur={onBlur}
+                onChangeText={(text) => {
+                  onChange(text);
+                  setHasmessage(!!text);
+                }}
+                value={value}
+              />
+            )}
+            name="content"
           />
+
           <TouchableOpacity activeOpacity={0.4}>
             <IconApp
               lib="MaterialCommunityIcons"
@@ -282,19 +329,21 @@ export default function HomeScreen() {
             />
           </TouchableOpacity>
 
-          <IconApp lib="Feather" name="camera" color="#ccc" />
+          <TouchableOpacity activeOpacity={0.4}>
+            <IconApp lib="Feather" name="camera" color="#ccc" />
+          </TouchableOpacity>
         </View>
 
         <GestureDetector gesture={panGesture}>
           <Animated.View style={animatedViewStyle}>
             <AnimatedPressable
               hitSlop={20}
-              // onPressIn={onPressIn}
+              onPress={handleSubmit(onSubmit)}
               // onPressOut={onPressOut}
               style={[
                 {
                   backgroundColor: "#00af00",
-                  padding: 8,
+                  padding: 10,
                   borderRadius: 999,
                   justifyContent: "center",
                   alignItems: "center",
@@ -302,7 +351,13 @@ export default function HomeScreen() {
                 animatedPressableStyle,
               ]}
             >
-              <IconApp lib="Ionicons" name="mic" color="#000" />
+              <Animated.View style={animatedIconStyle}>
+                <IconApp
+                  lib="Ionicons"
+                  name={hasMessage ? "send-sharp" : "mic"}
+                  color="#000"
+                />
+              </Animated.View>
             </AnimatedPressable>
           </Animated.View>
         </GestureDetector>
