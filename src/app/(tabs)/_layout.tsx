@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { IconApp } from "@/components/IconApp/IconApp";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -29,7 +29,8 @@ export default function TabLayout() {
             title: "Real time chat",
             headerTitleAlign: "center",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
+              <IconApp
+                lib="Ionicons"
                 name={focused ? "home" : "home-outline"}
                 color={color}
               />
@@ -41,7 +42,8 @@ export default function TabLayout() {
           options={{
             title: "Explore",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
+              <IconApp
+                lib="Ionicons"
                 name={focused ? "code-slash" : "code-slash-outline"}
                 color={color}
               />
@@ -54,7 +56,8 @@ export default function TabLayout() {
             title: "todo",
             headerTitleAlign: "center",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
+              <IconApp
+                lib="Ionicons"
                 name={focused ? "book" : "book-outline"}
                 color={color}
               />

@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { Colors } from "@/constants/Colors";
-import { TabBarIcon } from "./navigation/TabBarIcon";
+import { IconApp } from "@/components/IconApp/IconApp";
 import { useState } from "react";
 
 interface Props {
@@ -33,10 +33,10 @@ export function TodoCard({ todo, onEdit, onDelete }: Props) {
       </ThemedText>
       <View style={[styles.iconContainer]}>
         <TouchableOpacity onPress={onEdit}>
-          <TabBarIcon name="pencil" color="#fff" />
+          <IconApp lib="Ionicons" name="pencil" color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity onPress={onDelete}>
-          <TabBarIcon name="trash" color="#ff0000" />
+          <IconApp lib="Ionicons" name="trash" color="#ff0000" />
         </TouchableOpacity>
       </View>
     </ThemedView>

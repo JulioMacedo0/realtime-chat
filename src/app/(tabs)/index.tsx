@@ -8,6 +8,7 @@ import {
   useColorScheme,
   Pressable,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import Animated, { runOnJS } from "react-native-reanimated";
 
@@ -18,7 +19,7 @@ import { supabase } from "@/supabase/supabase";
 import * as Device from "expo-device";
 import { Screen } from "@/components";
 import { Colors } from "@/constants/Colors";
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
+import { IconApp } from "@/components/IconApp/IconApp";
 import {
   GestureDetector,
   Gesture,
@@ -50,10 +51,16 @@ type ContextType = {
   startY: number;
 };
 
+type Clamp = {
+  val: number;
+  min: number;
+  max: number;
+};
+
 type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
 
 export default function HomeScreen() {
-  function clamp(val, min, max) {
+  function clamp({ val, min, max }: Clamp) {
     return Math.min(Math.max(val, min), max);
   }
   const [messages, setMessages] = useState<Message[]>([]);
@@ -67,10 +74,9 @@ export default function HomeScreen() {
   const translationY = useSharedValue(0);
   const prevTranslationX = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
-  const startX = useSharedValue(0);
-  const startY = useSharedValue(0);
-  const MAX_TRANSLATE_X = 200; // Limite máximo de arrasto no eixo X
-  const MAX_TRANSLATE_Y = 200; // Limite máximo de arrasto no eixo Y
+
+  const MAX_TRANSLATE_X = 200;
+  const MAX_TRANSLATE_Y = 115;
 
   const animatedPressableStyle = useAnimatedStyle(() => {
     return {
@@ -87,16 +93,16 @@ export default function HomeScreen() {
   });
 
   const onPressIn = () => {
-    scale.value = withSpring(2.2, {
-      damping: 8, // Controla a quantidade de resistência na mola
-      stiffness: 150, // Controla a rigidez da mola
+    scale.value = withSpring(2, {
+      damping: 8,
+      stiffness: 150,
     });
   };
 
   const onPressOut = () => {
     scale.value = withSpring(1, {
-      damping: 8, // Controla a quantidade de resistência na mola
-      stiffness: 150, // Controla a rigidez da mola
+      damping: 8,
+      stiffness: 150,
     });
   };
 
@@ -137,10 +143,10 @@ export default function HomeScreen() {
     .enabled(true)
     .minDistance(1)
     .onBegin(() => {
-      // scale.value = withSpring(2.2, {
-      //   damping: 8,
-      //   stiffness: 150,
-      // });
+      scale.value = withSpring(2.2, {
+        damping: 8,
+        stiffness: 150,
+      });
     })
     .onStart((event) => {
       prevTranslationX.value = translationX.value;
@@ -152,6 +158,14 @@ export default function HomeScreen() {
 
       let nextTranslateX = event.translationX;
       let nextTranslateY = event.translationY;
+
+      if (nextTranslateX >= 0) {
+        initialDirection = null;
+      }
+
+      if (nextTranslateY >= 0) {
+        initialDirection = null;
+      }
 
       if (initialDirection === null) {
         if (
@@ -174,29 +188,28 @@ export default function HomeScreen() {
       }
 
       if (initialDirection === "x") {
-        nextTranslateY = translationY.value; // Manter o valor Y atual
+        nextTranslateY = translationY.value;
       } else {
-        nextTranslateX = translationX.value; // Manter o valor X atual
+        nextTranslateX = translationX.value;
       }
 
-      // Verifica se o próximo valor ultrapassa os limites
       if (
         Math.abs(nextTranslateX) >= maxTranslateX ||
         Math.abs(nextTranslateY) >= maxTranslateY
       ) {
         // runOnJS(onMaxReached)();
       } else {
-        translationX.value = clamp(
-          nextTranslateX,
-          -maxTranslateX,
-          maxTranslateX
-        );
+        translationX.value = clamp({
+          val: nextTranslateX,
+          min: -maxTranslateX,
+          max: maxTranslateX,
+        });
 
-        translationY.value = clamp(
-          nextTranslateY,
-          -maxTranslateY,
-          maxTranslateY
-        );
+        translationY.value = clamp({
+          val: nextTranslateY,
+          min: -maxTranslateY,
+          max: maxTranslateY,
+        });
       }
     })
     .onEnd(() => {
@@ -248,13 +261,17 @@ export default function HomeScreen() {
             borderRadius: 28,
             borderColor: "#ccc",
             borderWidth: 1,
+            paddingHorizontal: 6,
           }}
         >
+          <TouchableOpacity>
+            <IconApp lib="Ionicons" name="accessibility" color="#ccc" />
+          </TouchableOpacity>
           <TextInput
             style={styles.input}
             value={newMessage}
             onChangeText={setNewMessage}
-            placeholder="Type a message"
+            placeholder="Message"
           />
         </View>
 
@@ -262,7 +279,7 @@ export default function HomeScreen() {
           <Animated.View style={animatedViewStyle}>
             <AnimatedPressable
               hitSlop={20}
-              onPressIn={onPressIn}
+              // onPressIn={onPressIn}
               // onPressOut={onPressOut}
               style={[
                 {
@@ -275,7 +292,7 @@ export default function HomeScreen() {
                 animatedPressableStyle,
               ]}
             >
-              <TabBarIcon name="mic" color="#fff" />
+              <IconApp lib="Ionicons" name="mic" color="#fff" />
             </AnimatedPressable>
           </Animated.View>
         </GestureDetector>
