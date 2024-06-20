@@ -10,8 +10,8 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import Animated, { runOnJS } from "react-native-reanimated";
-
+import Animated from "react-native-reanimated";
+import { FontAwesome6 } from "@expo/vector-icons";
 import * as Crypto from "expo-crypto";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -261,11 +261,12 @@ export default function HomeScreen() {
             borderRadius: 28,
             borderColor: "#ccc",
             borderWidth: 1,
-            paddingHorizontal: 6,
+            paddingHorizontal: 12,
+            gap: 6,
           }}
         >
-          <TouchableOpacity>
-            <IconApp lib="Ionicons" name="accessibility" color="#ccc" />
+          <TouchableOpacity activeOpacity={0.4}>
+            <IconApp lib="FontAwesome6" name="face-laugh" color="#ccc" />
           </TouchableOpacity>
           <TextInput
             style={styles.input}
@@ -273,6 +274,15 @@ export default function HomeScreen() {
             onChangeText={setNewMessage}
             placeholder="Message"
           />
+          <TouchableOpacity activeOpacity={0.4}>
+            <IconApp
+              lib="MaterialCommunityIcons"
+              name="paperclip"
+              color="#ccc"
+            />
+          </TouchableOpacity>
+
+          <IconApp lib="Feather" name="camera" color="#ccc" />
         </View>
 
         <GestureDetector gesture={panGesture}>
@@ -292,7 +302,7 @@ export default function HomeScreen() {
                 animatedPressableStyle,
               ]}
             >
-              <IconApp lib="Ionicons" name="mic" color="#fff" />
+              <IconApp lib="Ionicons" name="mic" color="#000" />
             </AnimatedPressable>
           </Animated.View>
         </GestureDetector>
@@ -324,6 +334,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    padding: 8,
+    paddingVertical: 6,
   },
 });
