@@ -72,7 +72,7 @@ export default function HomeScreen() {
   const {
     control,
     handleSubmit,
-    getValues,
+    reset,
     formState: { errors },
   } = useForm<IFormInput>({
     defaultValues: {
@@ -88,7 +88,6 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
 
   const scale = useSharedValue(1);
-  const iconOpacity = useSharedValue(0);
 
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
@@ -109,12 +108,6 @@ export default function HomeScreen() {
         { translateX: translationX.value },
         { translateY: translationY.value },
       ],
-    };
-  });
-
-  const animatedIconStyle = useAnimatedStyle(() => {
-    return {
-      opacity: iconOpacity.value,
     };
   });
 
@@ -161,7 +154,7 @@ export default function HomeScreen() {
   let initialDirection: null | "x" | "y" = null;
   const TOLERANCE = 10;
   const panGesture = Gesture.Pan()
-    .enabled(true)
+    .enabled(!hasMessage)
     .minDistance(1)
     .onBegin(() => {
       scale.value = withSpring(2.2, {
@@ -266,13 +259,9 @@ export default function HomeScreen() {
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
     console.log(data);
     // sendMessage(data);
+    reset();
+    setHasmessage(false);
   };
-
-  useEffect(() => {
-    iconOpacity.value = withTiming(0, { duration: 200 }, () => {
-      iconOpacity.value = withTiming(1, { duration: 200 });
-    });
-  }, [hasMessage]);
 
   return (
     <Screen>
@@ -280,7 +269,7 @@ export default function HomeScreen() {
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item, index) => item.id}
-        style={styles.messageList}
+        style={[styles.messageList]}
       />
 
       <View style={styles.inputContainer}>
@@ -351,13 +340,11 @@ export default function HomeScreen() {
                 animatedPressableStyle,
               ]}
             >
-              <Animated.View style={animatedIconStyle}>
-                <IconApp
-                  lib="Ionicons"
-                  name={hasMessage ? "send-sharp" : "mic"}
-                  color="#000"
-                />
-              </Animated.View>
+              <IconApp
+                lib="Ionicons"
+                name={hasMessage ? "send-sharp" : "mic"}
+                color="#000"
+              />
             </AnimatedPressable>
           </Animated.View>
         </GestureDetector>
