@@ -255,8 +255,12 @@ export default function HomeScreen() {
     })
     .runOnJS(true);
 
-  const renderItem = ({ item }: ListRenderItemInfo<TMessage>) => (
-    <Message message={item} userId={userID} />
+  const renderItem = ({
+    item,
+    index,
+    separators,
+  }: ListRenderItemInfo<TMessage>) => (
+    <Message message={item} userId={userID} index={index} />
   );
 
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
