@@ -34,6 +34,7 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { Message } from "@/components/Message";
+import { useMessageStore } from "@/store/messageStore";
 
 export type TMessage = IFormInput;
 
@@ -66,11 +67,12 @@ interface IFormInput {
 
 type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
 
+const userID = Crypto.randomUUID();
+
 export default function HomeScreen() {
   function clamp({ val, min, max }: Clamp) {
     return Math.min(Math.max(val, min), max);
   }
-  const userID = Crypto.randomUUID();
 
   const {
     control,
@@ -87,8 +89,9 @@ export default function HomeScreen() {
       },
     },
   });
+  const messages = useMessageStore((state) => state.messages);
+  const addMessage = useMessageStore((state) => state.addMessage);
 
-  const [messages, setMessages] = useState<TMessage[]>([]);
   const [hasMessage, setHasmessage] = useState(false);
 
   const colorScheme = useColorScheme();
@@ -136,7 +139,7 @@ export default function HomeScreen() {
       .channel("public:chat")
       .on("broadcast", { event: "message" }, (payload: BroadcastPayload) => {
         console.log(payload, "== public:chat");
-        setMessages((currentMessages) => [...currentMessages, payload.payload]);
+        addMessage(payload.payload);
       })
       .subscribe();
 
@@ -253,7 +256,7 @@ export default function HomeScreen() {
     .runOnJS(true);
 
   const renderItem = ({ item }: ListRenderItemInfo<TMessage>) => (
-    <Message message={item} />
+    <Message message={item} userId={userID} />
   );
 
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -282,7 +285,7 @@ export default function HomeScreen() {
       <FlatList
         data={messages}
         renderItem={renderItem}
-        keyExtractor={(item, index) => item.user.id}
+        keyExtractor={(item, index) => item.content.id}
         style={[styles.messageList]}
       />
 
