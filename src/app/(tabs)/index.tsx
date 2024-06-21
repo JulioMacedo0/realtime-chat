@@ -9,6 +9,7 @@ import {
   Pressable,
   Alert,
   TouchableOpacity,
+  Text,
 } from "react-native";
 import Animated, { withTiming } from "react-native-reanimated";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
@@ -32,16 +33,13 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { Message } from "@/components/Message";
 
-type Message = {
-  id: string;
-  content: string;
-  user: string;
-};
+export type TMessage = IFormInput;
 
 type BroadcastPayload = {
   event: string;
-  payload: Message;
+  payload: TMessage;
   type: string;
 };
 
@@ -57,9 +55,13 @@ type Clamp = {
 };
 
 interface IFormInput {
-  id: string;
-  content: string;
-  user: string | null;
+  content: {
+    message: string;
+    id: string;
+  };
+  user: {
+    id: string;
+  };
 }
 
 type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
@@ -68,6 +70,7 @@ export default function HomeScreen() {
   function clamp({ val, min, max }: Clamp) {
     return Math.min(Math.max(val, min), max);
   }
+  const userID = Crypto.randomUUID();
 
   const {
     control,
@@ -76,13 +79,16 @@ export default function HomeScreen() {
     formState: { errors },
   } = useForm<IFormInput>({
     defaultValues: {
-      id: Crypto.randomUUID(),
-      content: "",
-      user: Device.deviceName,
+      content: {
+        message: "",
+      },
+      user: {
+        id: userID,
+      },
     },
   });
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<TMessage[]>([]);
   const [hasMessage, setHasmessage] = useState(false);
 
   const colorScheme = useColorScheme();
@@ -129,7 +135,7 @@ export default function HomeScreen() {
     const channel = supabase
       .channel("public:chat")
       .on("broadcast", { event: "message" }, (payload: BroadcastPayload) => {
-        console.log(payload);
+        console.log(payload, "== public:chat");
         setMessages((currentMessages) => [...currentMessages, payload.payload]);
       })
       .subscribe();
@@ -246,29 +252,37 @@ export default function HomeScreen() {
     })
     .runOnJS(true);
 
-  const renderItem = ({ item }: ListRenderItemInfo<Message>) => (
-    <ThemedView style={styles.messageContainer}>
-      <ThemedText style={{ color: "#000" }}>{item.user}</ThemedText>
-      <ThemedText style={{ color: "#000" }}>-</ThemedText>
-      <ThemedText style={{ color: "#000" }}>{item.content}</ThemedText>
-    </ThemedView>
+  const renderItem = ({ item }: ListRenderItemInfo<TMessage>) => (
+    <Message message={item} />
   );
 
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
     console.log(data);
-    // sendMessage(data);
+    const id = Crypto.randomUUID();
+    const payload: IFormInput = {
+      content: { ...data.content, id },
+      user: { ...data.user },
+    };
+    sendMessage(payload);
     reset();
     setHasmessage(false);
   };
 
+  const handleButton = () => {
+    if (hasMessage) {
+      handleSubmit(onSubmit)();
+    } else {
+      console.log("send audio");
+    }
+  };
   return (
     <Screen>
       <FlatList
         data={messages}
         renderItem={renderItem}
-        keyExtractor={(item, index) => item.id}
+        keyExtractor={(item, index) => item.user.id}
         style={[styles.messageList]}
       />
 
@@ -292,9 +306,7 @@ export default function HomeScreen() {
 
           <Controller
             control={control}
-            rules={{
-              required: true,
-            }}
+            rules={{}}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
                 style={styles.input}
@@ -302,12 +314,17 @@ export default function HomeScreen() {
                 onBlur={onBlur}
                 onChangeText={(text) => {
                   onChange(text);
-                  setHasmessage(!!text);
+
+                  if (text.length == 0) {
+                    setHasmessage(false);
+                  } else if (text.length == 1) {
+                    setHasmessage(true);
+                  }
                 }}
                 value={value}
               />
             )}
-            name="content"
+            name="content.message"
           />
 
           <TouchableOpacity activeOpacity={0.4}>
@@ -327,7 +344,7 @@ export default function HomeScreen() {
           <Animated.View style={animatedViewStyle}>
             <AnimatedPressable
               hitSlop={20}
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleButton}
               // onPressOut={onPressOut}
               style={[
                 {
@@ -362,13 +379,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 16,
   },
-  messageContainer: {
-    flexDirection: "row",
-    padding: 10,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 5,
-    marginVertical: 5,
-  },
+
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
