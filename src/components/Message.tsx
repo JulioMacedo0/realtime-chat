@@ -27,14 +27,15 @@ export function Message({ message, userId, index }: Props) {
     ? "#0a7ea4"
     : Colors[colorScheme ?? "light"].bgContrast;
 
-  console.log(index);
-  const isSequence = (index: number, id: string) => {
+  const isSequence = (index: number) => {
     if (index === 0) return false;
 
-    const previousId = messages.at(index)?.user.id;
-    console.log(`index ${index} comparando ${previousId} === ${id}`);
-    return previousId === id;
+    const previousId = messages.at(index - 1)?.user.id;
+
+    return previousId === message.user.id;
   };
+
+  const isSeq = isSequence(index);
 
   return (
     <View
@@ -52,7 +53,7 @@ export function Message({ message, userId, index }: Props) {
           <Image
             source="https://avatars.githubusercontent.com/u/57598810?v=4"
             style={{
-              opacity: isSequence(index, userId) ? 0 : 1,
+              opacity: isSeq ? 0 : 1,
               width: 30,
               height: 30,
               borderRadius: 999,
@@ -72,7 +73,7 @@ export function Message({ message, userId, index }: Props) {
             },
           ]}
         >
-          {!isUserMessage && (
+          {!isUserMessage && !isSeq && (
             <ThemedView
               style={{
                 backgroundColor: "transparent",
