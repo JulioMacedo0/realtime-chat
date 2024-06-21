@@ -82,6 +82,7 @@ export function Message({ message, userId, index }: Props) {
               <ThemedText
                 style={{
                   color: Colors[colorScheme ?? "light"].text,
+                  fontWeight: "bold",
                 }}
               >
                 UserName
@@ -108,6 +109,7 @@ export function Message({ message, userId, index }: Props) {
                 color: "#ccc",
                 fontSize: 13,
                 alignSelf: "flex-end",
+                marginLeft: 10,
               }}
             >
               15:30
@@ -131,7 +133,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   container: {
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingTop: 0,
+    paddingBottom: 10,
     borderRadius: 12,
   },
 });
