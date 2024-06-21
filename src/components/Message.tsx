@@ -122,7 +122,7 @@ export function Message({ message, userId, index }: Props) {
 const styles = StyleSheet.create({
   messageWrapper: {
     flexDirection: "row",
-    marginVertical: 5,
+    marginBottom: 4,
   },
   userMessageWrapper: {
     justifyContent: "flex-end",
