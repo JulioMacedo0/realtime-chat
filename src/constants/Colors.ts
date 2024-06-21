@@ -17,6 +17,7 @@ export const Colors = {
     tabIconSelected: tintColorLight,
     headerBackground: bgContrastLight,
     tabBarBackground: bgContrastLight,
+    bgContrast: bgContrastLight,
   },
   dark: {
     text: "#ECEDEE",
@@ -27,5 +28,6 @@ export const Colors = {
     tabIconSelected: tintColorDark,
     headerBackground: bgConstrantDark,
     tabBarBackground: bgConstrantDark,
+    bgContrast: bgConstrantDark,
   },
 };
