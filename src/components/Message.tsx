@@ -6,22 +6,35 @@ import { ThemedText } from "./ThemedText";
 import { Image } from "expo-image";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
+import { useMessageStore } from "@/store/messageStore";
+
+const blurhash =
+  "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
 type Props = {
   message: TMessage;
   userId: string;
+  index: number;
 };
 
-export function Message({ message, userId }: Props) {
+export function Message({ message, userId, index }: Props) {
   const colorScheme = useColorScheme();
+
+  const messages = useMessageStore((state) => state.messages);
   const { width } = useWindowDimensions();
   const isUserMessage = message.user.id === userId;
   const backgroundColor = isUserMessage
     ? "#0a7ea4"
     : Colors[colorScheme ?? "light"].bgContrast;
 
-  const blurhash =
-    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
+  console.log(index);
+  const isSequence = (index: number, id: string) => {
+    if (index === 0) return false;
+
+    const previousId = messages.at(index)?.user.id;
+    console.log(`index ${index} comparando ${previousId} === ${id}`);
+    return previousId === id;
+  };
 
   return (
     <View
@@ -39,6 +52,7 @@ export function Message({ message, userId }: Props) {
           <Image
             source="https://avatars.githubusercontent.com/u/57598810?v=4"
             style={{
+              opacity: isSequence(index, userId) ? 0 : 1,
               width: 30,
               height: 30,
               borderRadius: 999,
