@@ -1,19 +1,48 @@
 import { IconApp } from "@/components";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import { useState } from "react";
+import {
+  CameraView,
+  useCameraPermissions,
+  CameraNativeProps,
+  CameraType,
+  CameraPictureOptions,
+} from "expo-camera";
+import { router } from "expo-router";
+import { useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function Camera() {
-  const [facing, setFacing] = useState("back");
+  const [facing, setFacing] = useState<CameraType>("back");
+  const cameraRef = useRef<CameraView | null>(null);
 
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
+
+  const takePhoto = async () => {
+    if (cameraRef.current) {
+      const options: CameraPictureOptions = {
+        quality: 0.5,
+        base64: true,
+        skipProcessing: true,
+      };
+      const data = await cameraRef.current.takePictureAsync(options);
+      console.log(data?.uri);
+    }
+  };
+
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <CameraView style={styles.camera} facing={facing}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         <View style={styles.header}>
-          <IconApp lib="AntDesign" name="close" color="#fff" />
+          <TouchableOpacity onPress={goBack}>
+            <IconApp lib="AntDesign" name="close" color="#fff" />
+          </TouchableOpacity>
           <IconApp lib="Ionicons" name="flash" color="#fff" />
         </View>
         <View style={styles.footer}>
@@ -25,11 +54,11 @@ export default function Camera() {
             />
           </TouchableOpacity>
 
-          <View
+          <TouchableOpacity
+            onPress={takePhoto}
             style={{
               borderColor: "#fff",
               borderWidth: 3,
-
               borderRadius: 99,
               padding: 6,
             }}
@@ -42,7 +71,7 @@ export default function Camera() {
                 borderRadius: 99,
               }}
             />
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.footerButtom}
             onPress={toggleCameraFacing}
