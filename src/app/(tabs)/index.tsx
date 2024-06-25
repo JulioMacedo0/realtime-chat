@@ -35,6 +35,7 @@ import {
 } from "react-native-reanimated";
 import { Message } from "@/components/Message";
 import { useMessageStore } from "@/store/messageStore";
+import { Camera } from "@/components/Camera";
 
 export type TMessage = IFormInput;
 
@@ -316,7 +317,13 @@ export default function HomeScreen() {
             rules={{}}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                style={styles.input}
+                placeholderTextColor="#ccc"
+                style={[
+                  styles.input,
+                  {
+                    color: Colors[colorScheme ?? "light"].text,
+                  },
+                ]}
                 placeholder="Message"
                 onBlur={onBlur}
                 onChangeText={(text) => {
@@ -342,9 +349,7 @@ export default function HomeScreen() {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.4}>
-            <IconApp lib="Feather" name="camera" color="#ccc" />
-          </TouchableOpacity>
+          <Camera />
         </View>
 
         <GestureDetector gesture={panGesture}>
