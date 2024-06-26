@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 export default function Camera() {
   const [facing, setFacing] = useState<CameraType>("back");
   const cameraRef = useRef<CameraView | null>(null);
@@ -26,7 +27,9 @@ export default function Camera() {
         skipProcessing: true,
       };
       const data = await cameraRef.current.takePictureAsync(options);
+
       console.log(data?.uri);
+      router.push("/cameraSend");
     }
   };
 
