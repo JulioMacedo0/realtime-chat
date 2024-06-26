@@ -62,6 +62,7 @@ type contentMessage = {
   type: contentType.message;
   id: string;
   date: string;
+  message: string;
 };
 
 type contentPhoto = {
