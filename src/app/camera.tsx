@@ -60,7 +60,7 @@ export default function Camera() {
               borderColor: "#fff",
               borderWidth: 3,
               borderRadius: 99,
-              padding: 6,
+              padding: 5,
             }}
           >
             <View
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   },
   footerButtom: {
     padding: 10,
-    backgroundColor: "#333",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     borderRadius: 99,
   },
 });
