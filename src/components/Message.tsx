@@ -21,7 +21,7 @@ export function Message({ message, userId, index }: Props) {
 
   const messages = useMessages();
 
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   const isUserMessage = message.user.id === userId;
   const backgroundColor = isUserMessage
@@ -82,6 +82,17 @@ export function Message({ message, userId, index }: Props) {
             </ThemedView>
           )}
 
+          {message.content.type == contentType.photo && (
+            <Image
+              source={message.content.url}
+              contentFit="cover"
+              style={{
+                height: 40,
+                width: 70,
+              }}
+            />
+          )}
+
           <View
             style={{
               flexDirection: "row",
@@ -129,9 +140,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   container: {
-    paddingHorizontal: 10,
-    paddingTop: 0,
-    paddingBottom: 10,
+    paddingHorizontal: 4,
+    paddingTop: 6,
     borderRadius: 12,
   },
 });
