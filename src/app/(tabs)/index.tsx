@@ -9,22 +9,19 @@ import {
   Pressable,
   Alert,
   TouchableOpacity,
-  Text,
 } from "react-native";
-import Animated, { withTiming } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import * as Crypto from "expo-crypto";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+
 import { supabase } from "@/supabase/supabase";
-import * as Device from "expo-device";
+
 import { Screen } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { IconApp } from "@/components/IconApp/IconApp";
 import {
   GestureDetector,
   Gesture,
-  GestureHandlerRootView,
   GestureUpdateEvent,
   PanGestureHandlerEventPayload,
 } from "react-native-gesture-handler";
@@ -34,7 +31,7 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { Message } from "@/components/Message";
-import { useMessageStore } from "@/store/messageStore";
+import { useMessages, useMessagesActions } from "@/store/messageStore";
 import { Camera } from "@/components/Camera";
 
 export type TMessage = IFormInput;
@@ -56,11 +53,27 @@ type Clamp = {
   max: number;
 };
 
+export enum contentType {
+  message,
+  photo,
+}
+
+type contentMessage = {
+  type: contentType.message;
+  id: string;
+  date: string;
+};
+
+type contentPhoto = {
+  type: contentType.photo;
+  message: string;
+  id: string;
+  date: string;
+  url: string;
+};
+
 interface IFormInput {
-  content: {
-    message: string;
-    id: string;
-  };
+  content: contentMessage | contentPhoto;
   user: {
     id: string;
   };
@@ -90,8 +103,9 @@ export default function HomeScreen() {
       },
     },
   });
-  const messages = useMessageStore((state) => state.messages);
-  const addMessage = useMessageStore((state) => state.addMessage);
+
+  const messages = useMessages();
+  const { addMessage } = useMessagesActions();
 
   const [hasMessage, setHasmessage] = useState(false);
 
@@ -138,8 +152,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const channel = supabase
       .channel("public:chat")
-      .on("broadcast", { event: "message" }, (payload: BroadcastPayload) => {
-        console.log(payload, "== public:chat");
+      .on("broadcast", { event: `message` }, (payload: BroadcastPayload) => {
         addMessage(payload.payload);
       })
       .subscribe();
@@ -150,7 +163,7 @@ export default function HomeScreen() {
   }, []);
 
   const sendMessage = async (payload: IFormInput) => {
-    await supabase.channel("public:chat").send({
+    const resp = await supabase.channel("public:chat").send({
       type: "broadcast",
       event: "message",
       payload,
@@ -268,9 +281,17 @@ export default function HomeScreen() {
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
     console.log(data);
+
+    const now = new Date();
+
     const id = Crypto.randomUUID();
     const payload: IFormInput = {
-      content: { ...data.content, id },
+      content: {
+        ...data.content,
+        id,
+        type: contentType.message,
+        date: now.toISOString(),
+      },
       user: { ...data.user },
     };
     sendMessage(payload);
