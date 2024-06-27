@@ -54,8 +54,8 @@ type Clamp = {
 };
 
 export enum contentType {
-  message,
-  photo,
+  message = "message",
+  photo = "photo",
 }
 
 type contentMessage = {
@@ -73,7 +73,7 @@ type contentPhoto = {
   url: string;
 };
 
-interface IFormInput {
+export interface IFormInput {
   content: contentMessage | contentPhoto;
   user: {
     id: string;
@@ -82,7 +82,7 @@ interface IFormInput {
 
 type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
 
-const userID = Crypto.randomUUID();
+export const userID = Crypto.randomUUID();
 
 export default function HomeScreen() {
   function clamp({ val, min, max }: Clamp) {
