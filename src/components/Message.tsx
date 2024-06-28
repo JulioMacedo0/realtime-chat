@@ -18,10 +18,8 @@ type Props = {
 
 export function Message({ message, userId, index }: Props) {
   const colorScheme = useColorScheme();
-
   const messages = useMessages();
-
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isUserMessage = message.user.id === userId;
   const backgroundColor = isUserMessage
@@ -30,9 +28,7 @@ export function Message({ message, userId, index }: Props) {
 
   const isSequence = (index: number) => {
     if (index === 0) return false;
-
     const previousId = messages.at(index - 1)?.user.id;
-
     return previousId === message.user.id;
   };
 
@@ -45,11 +41,7 @@ export function Message({ message, userId, index }: Props) {
         isUserMessage ? styles.userMessageWrapper : styles.otherMessageWrapper,
       ]}
     >
-      <ThemedView
-        style={{
-          flexDirection: "row",
-        }}
-      >
+      <ThemedView style={{ flexDirection: "row" }}>
         {!isUserMessage && (
           <PorfilePicture
             isSeq={isSeq}
@@ -66,11 +58,7 @@ export function Message({ message, userId, index }: Props) {
           ]}
         >
           {!isUserMessage && !isSeq && (
-            <ThemedView
-              style={{
-                backgroundColor: "transparent",
-              }}
-            >
+            <ThemedView style={{ backgroundColor: "transparent" }}>
               <ThemedText
                 style={{
                   color: Colors[colorScheme ?? "light"].text,
@@ -82,45 +70,36 @@ export function Message({ message, userId, index }: Props) {
             </ThemedView>
           )}
 
-          {message.content.type == contentType.photo && (
-            <Image
-              source={message.content.url}
-              contentFit="cover"
-              style={{
-                height: 40,
-                width: 70,
-              }}
-            />
+          {message.content.type === contentType.photo && (
+            <View style={styles.imageContainer}>
+              <Image
+                source={message.content.url}
+                contentFit="cover"
+                style={[
+                  styles.image,
+                  {
+                    aspectRatio: 16 / 9,
+                    width: "100%",
+                  },
+                ]}
+              />
+            </View>
           )}
 
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              justifyContent: "space-between",
-            }}
-          >
-            {message.content.type == contentType.message && (
-              <>
-                <ThemedText
-                  style={{
-                    color: Colors[colorScheme ?? "light"].text,
-                  }}
-                >
-                  {message.content.message}
-                </ThemedText>
-                <ThemedText
-                  style={{
-                    color: "#ccc",
-                    fontSize: 13,
-                    alignSelf: "flex-end",
-                    marginLeft: 10,
-                  }}
-                >
-                  {format(message.content.date, "HH:mm")}
-                </ThemedText>
-              </>
-            )}
+          <View style={styles.messageContent}>
+            <ThemedText style={{ color: Colors[colorScheme ?? "light"].text }}>
+              {message.content.message}
+            </ThemedText>
+            <ThemedText
+              style={{
+                color: "#ccc",
+                fontSize: 13,
+                alignSelf: "flex-end",
+                marginLeft: 10,
+              }}
+            >
+              {format(message.content.date, "HH:mm")}
+            </ThemedText>
           </View>
         </View>
       </ThemedView>
@@ -143,5 +122,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingTop: 6,
     borderRadius: 12,
+  },
+  imageContainer: {
+    width: "100%",
+    marginVertical: 10,
+  },
+  image: {
+    width: "100%",
+    height: undefined,
+  },
+  messageContent: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
 });
