@@ -78,7 +78,7 @@ export function Message({ message, userId, index }: Props) {
                 style={[
                   styles.image,
                   {
-                    aspectRatio: 16 / 9,
+                    aspectRatio: 3 / 4,
                     width: "100%",
                   },
                 ]}
@@ -87,10 +87,14 @@ export function Message({ message, userId, index }: Props) {
           )}
 
           <View style={styles.messageContainer}>
-            <ThemedText style={{ color: Colors[colorScheme ?? "light"].text }}>
+            <ThemedText
+              style={{
+                color: Colors[colorScheme ?? "light"].text,
+              }}
+            >
               {message.content.message}
             </ThemedText>
-            <ThemedText style={styles.messageDate}>
+            <ThemedText style={[styles.messageDate]}>
               {format(message.content.date, "HH:mm")}
             </ThemedText>
           </View>
@@ -132,6 +136,5 @@ const styles = StyleSheet.create({
     color: "#ccc",
     fontSize: 13,
     alignSelf: "flex-end",
-    marginLeft: 10,
   },
 });
