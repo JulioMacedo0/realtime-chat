@@ -9,6 +9,7 @@ import {
   Pressable,
   Alert,
   TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
 import Animated from "react-native-reanimated";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
@@ -106,10 +107,11 @@ export default function HomeScreen() {
   });
 
   const messages = useMessages();
+
   const { addMessage } = useMessagesActions();
 
   const [hasMessage, setHasmessage] = useState(false);
-
+  const { height } = useWindowDimensions();
   const colorScheme = useColorScheme();
 
   const scale = useSharedValue(1);
@@ -278,6 +280,14 @@ export default function HomeScreen() {
     <Message message={item} userId={userID} index={index} />
   );
 
+  const renderSeparator = () => (
+    <View
+      style={{
+        height: height * 0.004,
+      }}
+    />
+  );
+
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
@@ -312,6 +322,7 @@ export default function HomeScreen() {
       <FlatList
         data={messages}
         renderItem={renderItem}
+        ItemSeparatorComponent={renderSeparator}
         keyExtractor={(item, index) => item.content.id}
         style={[styles.messageList]}
       />

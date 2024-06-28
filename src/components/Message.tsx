@@ -110,7 +110,6 @@ export function Message({ message, userId, index }: Props) {
 const styles = StyleSheet.create({
   messageWrapper: {
     flexDirection: "row",
-    marginBottom: 4,
   },
   userMessageWrapper: {
     justifyContent: "flex-end",
@@ -119,9 +118,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   container: {
-    paddingHorizontal: 4,
-    paddingTop: 6,
     borderRadius: 12,
+    padding: 4,
   },
   imageContainer: {
     width: "100%",
@@ -130,6 +128,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: undefined,
+    borderRadius: 12,
   },
   messageContent: {
     flexDirection: "row",
