@@ -86,18 +86,11 @@ export function Message({ message, userId, index }: Props) {
             </View>
           )}
 
-          <View style={styles.messageContent}>
+          <View style={styles.messageContainer}>
             <ThemedText style={{ color: Colors[colorScheme ?? "light"].text }}>
               {message.content.message}
             </ThemedText>
-            <ThemedText
-              style={{
-                color: "#ccc",
-                fontSize: 13,
-                alignSelf: "flex-end",
-                marginLeft: 10,
-              }}
-            >
+            <ThemedText style={styles.messageDate}>
               {format(message.content.date, "HH:mm")}
             </ThemedText>
           </View>
@@ -123,16 +116,22 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    marginVertical: 10,
   },
   image: {
     width: "100%",
     height: undefined,
     borderRadius: 12,
   },
-  messageContent: {
+  messageContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+  },
+
+  messageDate: {
+    color: "#ccc",
+    fontSize: 13,
+    alignSelf: "flex-end",
+    marginLeft: 10,
   },
 });
