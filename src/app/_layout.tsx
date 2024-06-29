@@ -39,13 +39,22 @@ export default function RootLayout() {
           name="camera"
           options={{
             headerShown: false,
-            animation: "slide_from_right",
+            animation: "ios",
+            animationDuration: 1500,
           }}
         />
         <Stack.Screen
           name="cameraSend"
           options={{
             headerShown: false,
+            animation: "fade",
+          }}
+        />
+        <Stack.Screen
+          name="viewImgModal"
+          options={{
+            headerShown: true,
+            animation: "ios",
           }}
         />
       </Stack>
