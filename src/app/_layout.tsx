@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/constants/Colors";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -51,10 +52,18 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="viewImgModal"
+          name="contentView"
           options={{
             headerShown: true,
+            title: "",
             animation: "ios",
+            contentStyle: {
+              backgroundColor: Colors[colorScheme ?? "light"].background,
+            },
+            headerTransparent: true,
+            headerStyle: {
+              backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
+            },
           }}
         />
       </Stack>
