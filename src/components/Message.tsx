@@ -1,6 +1,11 @@
 import React from "react";
 import { contentType, TMessage } from "@/app/(tabs)";
-import { StyleSheet, useWindowDimensions, View } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { ThemedView } from "./ThemedView";
 import { ThemedText } from "./ThemedText";
 import { Image } from "expo-image";
@@ -9,6 +14,7 @@ import { Colors } from "@/constants/Colors";
 import { useMessages } from "@/store/messageStore";
 import { format } from "date-fns";
 import { PorfilePicture } from "./ProfilePicture";
+import { router } from "expo-router";
 
 type Props = {
   message: TMessage;
@@ -71,7 +77,13 @@ export function Message({ message, userId, index }: Props) {
           )}
 
           {message.content.type === contentType.photo && (
-            <View style={styles.imageContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                router.push(`/contentView?imgUrl=${message.content.url}`);
+              }}
+              activeOpacity={0.7}
+              style={styles.imageContainer}
+            >
               <Image
                 source={message.content.url}
                 contentFit="cover"
@@ -83,7 +95,7 @@ export function Message({ message, userId, index }: Props) {
                   },
                 ]}
               />
-            </View>
+            </TouchableOpacity>
           )}
 
           <View style={styles.messageContainer}>
