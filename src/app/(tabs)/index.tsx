@@ -57,6 +57,7 @@ type Clamp = {
 export enum contentType {
   message = "message",
   photo = "photo",
+  video = "video",
 }
 
 type contentMessage = {
@@ -74,8 +75,16 @@ type contentPhoto = {
   url: string;
 };
 
+type contentVideo = {
+  type: contentType.video;
+  message: string;
+  id: string;
+  date: string;
+  url: string;
+};
+
 export interface IFormInput {
-  content: contentMessage | contentPhoto;
+  content: contentMessage | contentPhoto | contentVideo;
   user: {
     id: string;
   };
