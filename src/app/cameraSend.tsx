@@ -18,7 +18,7 @@ import { Image } from "expo-image";
 import { IconApp } from "@/components";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { IFormInput, userID } from "./(tabs)";
+import { IFormInput, contentType, userID } from "./(tabs)";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { supabase } from "@/supabase/supabase";
 import * as Crypto from "expo-crypto";
@@ -63,6 +63,7 @@ export default function CameraSend() {
             cacheControl: "3600",
             upsert: false,
             contentType: `image/${fileType}`,
+            duplex: "",
           });
 
         if (!error) {
@@ -148,7 +149,9 @@ export default function CameraSend() {
           </View>
         </View>
 
-        <Image source={imgUrl} style={styles.photo} />
+        {type == contentType.photo && (
+          <Image source={imgUrl} style={styles.photo} />
+        )}
       </View>
       <View style={styles.bottomContainer}>
         <View
