@@ -24,9 +24,9 @@ export function VideoPlayer({ uri }: Props) {
         source={{
           uri,
         }}
-        useNativeControls
         resizeMode={ResizeMode.CONTAIN}
         isLooping
+        useNativeControls
         onPlaybackStatusUpdate={(playbackStatus) => {
           if (!playbackStatus.isLoaded) {
             // Update your UI for the unloaded state
