@@ -1,5 +1,5 @@
 import React from "react";
-import { contentType, TMessage } from "@/app/(tabs)";
+
 import {
   StyleSheet,
   TouchableOpacity,
@@ -15,6 +15,7 @@ import { useMessages } from "@/store/messageStore";
 import { format } from "date-fns";
 import { PorfilePicture } from "./ProfilePicture";
 import { router } from "expo-router";
+import { contentType, TMessage } from "@/@types/types";
 
 type Props = {
   message: TMessage;

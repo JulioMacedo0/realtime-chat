@@ -34,8 +34,7 @@ import {
 import { Message } from "@/components/Message";
 import { useMessages, useMessagesActions } from "@/store/messageStore";
 import { Camera } from "@/components/Camera";
-
-export type TMessage = IFormInput;
+import { TMessage, contentType } from "@/@types/types";
 
 type BroadcastPayload = {
   event: string;
@@ -53,12 +52,6 @@ type Clamp = {
   min: number;
   max: number;
 };
-
-export enum contentType {
-  message = "message",
-  photo = "photo",
-  video = "video",
-}
 
 type contentMessage = {
   type: contentType.message;
@@ -370,10 +363,9 @@ export default function HomeScreen() {
                 onBlur={onBlur}
                 onChangeText={(text) => {
                   onChange(text);
-
                   if (text.length == 0) {
                     setHasmessage(false);
-                  } else if (text.length == 1) {
+                  } else if (text.length >= 1) {
                     setHasmessage(true);
                   }
                 }}

@@ -1,29 +1,37 @@
 import { IconApp } from "@/components";
 import {
   CameraView,
-  useCameraPermissions,
-  CameraNativeProps,
   CameraType,
   CameraPictureOptions,
   Camera as CameraExpo,
+  FlashMode,
+  CameraMode,
 } from "expo-camera";
 import { router } from "expo-router";
 import { useRef, useState } from "react";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { contentType } from "./(tabs)";
+
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 
+import { VerticalFlashModeCarrousel } from "@/components/VerticalFlashModeCarrousel";
+import { SpringConfig } from "react-native-reanimated/lib/typescript/animation/springUtils";
+import { contentType } from "@/@types/types";
+
 export default function Camera() {
+  const springConf: SpringConfig = {
+    damping: 8,
+    stiffness: 150,
+  };
   const [facing, setFacing] = useState<CameraType>("back");
   const [type, setType] = useState<contentType>(contentType.photo);
-
-  const [permission, requestPermission] = useCameraPermissions();
-
+  const [flashMode, setFlashMode] = useState<FlashMode>("off");
+  const [cameraMode, setCameraMode] = useState<CameraMode>("picture");
   const cameraRef = useRef<CameraView | null>(null);
   const animatedContentType = useSharedValue<contentType>(contentType.photo);
   const isRecoding = useSharedValue(false);
@@ -34,21 +42,21 @@ export default function Camera() {
       animatedContentType.value === contentType.video &&
       isRecoding.value == false
     ) {
-      width = withTiming(20);
-      height = withTiming(20);
-      borderRadius = withTiming(99);
+      width = withSpring(20, springConf);
+      height = withSpring(20, springConf);
+      borderRadius = withSpring(99, springConf);
       backgroundColor = withTiming("#fff");
     } else if (animatedContentType.value === contentType.photo) {
-      width = withTiming(30);
-      height = withTiming(30);
+      width = withSpring(30, springConf);
+      height = withSpring(30, springConf);
       borderRadius = withTiming(99);
       backgroundColor = withTiming("#fff");
     } else if (
       animatedContentType.value === contentType.video &&
       isRecoding.value == true
     ) {
-      width = withTiming(20);
-      height = withTiming(20);
+      width = withSpring(20, springConf);
+      height = withSpring(20, springConf);
       borderRadius = withTiming(2);
       backgroundColor = withTiming("#ea394bff");
     }
@@ -67,42 +75,54 @@ export default function Camera() {
 
   const setVideoMode = () => {
     setType(contentType.video);
+    setCameraMode("video");
     animatedContentType.value = contentType.video;
   };
 
   const setPhotoMode = () => {
     setType(contentType.photo);
+    setCameraMode("picture");
     animatedContentType.value = contentType.photo;
   };
 
   const takePhoto = async () => {
     if (!cameraRef.current) throw "cameraRef dont exist";
-    const options: CameraPictureOptions = {
-      quality: 0.5,
-      base64: true,
-      skipProcessing: true,
-    };
-    const data = await cameraRef.current.takePictureAsync(options);
-    console.log(data);
-    router.push(`/cameraSend?imgUrl=${data?.uri}&type=${type}`);
+    cameraRef.current._onCameraReady();
+    try {
+      const options: CameraPictureOptions = {
+        quality: 0.5,
+        base64: true,
+        skipProcessing: true,
+      };
+      const data = await cameraRef.current.takePictureAsync(options);
+
+      router.push(`/cameraSend?imgUrl=${data?.uri}&type=${type}`);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const recordvideo = async () => {
     if (!cameraRef.current) throw "cameraRef dont exist";
-    const microphonePermission =
-      await CameraExpo.getMicrophonePermissionsAsync();
-    console.log(microphonePermission);
-    if (!microphonePermission.granted) {
-      const permission = await CameraExpo.requestMicrophonePermissionsAsync();
-      if (permission.granted == false) {
-        alert("Need record audio permission");
-        return;
+
+    try {
+      const microphonePermission =
+        await CameraExpo.getMicrophonePermissionsAsync();
+      console.log(microphonePermission);
+      if (!microphonePermission.granted) {
+        const permission = await CameraExpo.requestMicrophonePermissionsAsync();
+        if (permission.granted == false) {
+          alert("Need record audio permission");
+          return;
+        }
       }
+      isRecoding.value = true;
+      const data = await cameraRef.current.recordAsync({});
+      console.log(data?.uri);
+      router.push(`/cameraSend?imgUrl=${data?.uri}&type=${type}`);
+    } catch (error) {
+      console.error(error);
     }
-    isRecoding.value = true;
-    const data = await cameraRef.current.recordAsync();
-    console.log(data?.uri);
-    router.push(`/cameraSend?imgUrl=${data?.uri}&type=${type}`);
   };
 
   const stopRecrodVideo = () => {
@@ -129,7 +149,9 @@ export default function Camera() {
   return (
     <SafeAreaView style={styles.container}>
       <CameraView
-        mode="video"
+        mode={cameraMode}
+        flash={flashMode}
+        videoQuality="720p"
         style={styles.camera}
         facing={facing}
         ref={cameraRef}
@@ -138,7 +160,11 @@ export default function Camera() {
           <TouchableOpacity onPress={goBack}>
             <IconApp lib="AntDesign" name="close" color="#fff" />
           </TouchableOpacity>
-          <IconApp lib="Ionicons" name="flash" color="#fff" />
+          <VerticalFlashModeCarrousel
+            onChange={(flashmode) => {
+              setFlashMode(flashmode);
+            }}
+          />
         </View>
         <View style={styles.footer}>
           <TouchableOpacity style={styles.footerButtom}>
