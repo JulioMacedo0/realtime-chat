@@ -24,6 +24,7 @@ import { supabase } from "@/supabase/supabase";
 import * as Crypto from "expo-crypto";
 import { useState } from "react";
 import { decode } from "base64-arraybuffer";
+import { VideoPlayer } from "@/components/VideoPlayer";
 export default function CameraSend() {
   const { imgUrl, type } = useLocalSearchParams();
 
@@ -152,6 +153,7 @@ export default function CameraSend() {
         {type == contentType.photo && (
           <Image source={imgUrl} style={styles.photo} />
         )}
+        {type == contentType.video && <VideoPlayer uri={imgUrl} />}
       </View>
       <View style={styles.bottomContainer}>
         <View
