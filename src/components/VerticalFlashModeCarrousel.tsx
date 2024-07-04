@@ -1,7 +1,7 @@
 import { FlashMode } from "expo-camera";
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { TouchableOpacity } from "react-native";
+import Animated, { Keyframe } from "react-native-reanimated";
 import { IconApp } from "./IconApp/IconApp";
 
 type Props = {
@@ -14,8 +14,6 @@ export const VerticalFlashModeCarrousel = ({ onChange }: Props) => {
     <IconApp lib="MaterialCommunityIcons" name="flash-auto" color="#fff" />,
   ];
   const [index, setIndex] = useState(0);
-
-  const CurrentComponent = items[index];
 
   useEffect(() => {
     if (!onChange) return;
@@ -42,11 +40,25 @@ export const VerticalFlashModeCarrousel = ({ onChange }: Props) => {
     throw "VerticalCarrousel needs at least 1 item ";
   }
 
+  const enteringAnimation = new Keyframe({
+    0: { opacity: 0, transform: [{ translateY: -50 }] },
+    100: { opacity: 1, transform: [{ translateY: 0 }] },
+  }).duration(100);
+
+  const exitingAnimation = new Keyframe({
+    0: { opacity: 1, transform: [{ translateY: 0 }] },
+    100: { opacity: 0, transform: [{ translateY: 50 }] },
+  }).duration(100);
+
   return (
-    <Animated.View entering={FadeInUp.duration(1000)} exiting={FadeInDown}>
-      <TouchableOpacity onPress={showNextComponent}>
-        {CurrentComponent}
-      </TouchableOpacity>
-    </Animated.View>
+    <TouchableOpacity onPress={showNextComponent}>
+      <Animated.View
+        key={index}
+        entering={enteringAnimation}
+        exiting={exitingAnimation}
+      >
+        {items[index]}
+      </Animated.View>
+    </TouchableOpacity>
   );
 };
