@@ -1,28 +1,19 @@
-import { TMessage } from "@/app/(tabs)";
+import { ContentPayload } from "@/@types/types";
 import { create } from "zustand";
-// export type TMessage = {
-//   content: {
-//     message: string;
-//     id: string;
-//   };
-//   user: {
-//     id: string;
-//   };
-// };
 
 type Actions = {
-  addMessage: (message: TMessage) => void;
+  addMessage: (message: ContentPayload) => void;
 };
 
 type MessageState = {
-  messages: TMessage[];
+  messages: ContentPayload[];
   actions: Actions;
 };
 
 const useMessageStore = create<MessageState>((set) => ({
   messages: [],
   actions: {
-    addMessage: (message: TMessage) =>
+    addMessage: (message: ContentPayload) =>
       set((state) => ({
         messages: [...state.messages, message],
       })),
