@@ -14,17 +14,17 @@ export type contentMessage = contentBase & {
   message: string;
 };
 
-export type contentPhoto = {
+export type contentPhoto = contentBase & {
   type: contentType.photo;
   message: string;
   url: string;
   previewUrl: string;
   meta: {
     localUri: string;
-  } & contentBase;
+  };
 };
 
-export type contentVideo = {
+export type contentVideo = contentBase & {
   type: contentType.video;
   message: string;
   url: string;
@@ -32,7 +32,7 @@ export type contentVideo = {
   meta: {
     localUri: string;
   };
-} & contentBase;
+};
 
 export type ContentPayload = {
   content: contentMessage | contentPhoto | contentVideo;
@@ -41,14 +41,14 @@ export type ContentPayload = {
   };
 };
 
-export type ContentMessagePayload = {
+export type ContentMessagePayload = ContentPayload & {
   content: contentMessage;
-} & ContentPayload;
+};
 
-export type ContentPhotoPayload = {
+export type ContentPhotoPayload = ContentPayload & {
   content: contentPhoto;
-} & ContentPayload;
+};
 
-export type ContentVideoPayload = {
+export type ContentVideoPayload = ContentPayload & {
   content: contentVideo;
-} & ContentPayload;
+};
