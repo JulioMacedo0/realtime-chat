@@ -1,30 +1,25 @@
 import React from "react";
 
-import {
-  StyleSheet,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import { ThemedView } from "../ThemedView";
 import { ThemedText } from "../ThemedText";
-import { Image } from "expo-image";
+
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 import { useMessages } from "@/store/messageStore";
-import { format } from "date-fns";
+
 import { PorfilePicture } from "../ProfilePicture";
-import { router } from "expo-router";
+
 import {
-  ContentMessagePayload,
   contentType,
   ContentPayload,
-  ContentVideoPayload,
+  ContentPhotoPayload,
 } from "@/@types/types";
 import { useStorageUpload } from "@/hooks/useStorageUpload";
 import { DateMessage } from "./components/DateMessage";
 import { MessageText } from "./components/MessageText";
 import { USER_ID } from "@/supabase/supabase";
+import { PhotoMessage } from "./components/PhotoMessage";
 
 type Props = {
   message: ContentPayload;
@@ -50,6 +45,15 @@ export function Message({ message, index }: Props) {
   };
 
   const isSeq = isSequence(index);
+
+  const renderContent = () => {
+    switch (message.content.type) {
+      case contentType.photo:
+        return <PhotoMessage message={message as ContentPhotoPayload} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <View
@@ -87,39 +91,20 @@ export function Message({ message, index }: Props) {
             </ThemedView>
           )}
 
-          {message.content.type === contentType.photo && (
-            <TouchableOpacity
-              onPress={() => {
-                if (!message.content.url) {
-                  alert("Content dont exist");
-                  return;
-                }
-                router.push(`/contentView?imgUrl=${message.content.url}`);
-              }}
-              activeOpacity={0.7}
-              style={styles.imageContainer}
-            >
-              <Image
-                source={message.content.previewUrl}
-                contentFit="cover"
-                style={[
-                  styles.image,
-                  {
-                    aspectRatio: 3 / 4,
-                    width: "100%",
-                  },
-                ]}
-              />
-            </TouchableOpacity>
-          )}
+          {renderContent()}
 
-          <View style={styles.messageContainer}>
-            <MessageText
-              isUserMessage={isUserMessage}
-              text={message.content.message}
-            />
-            <DateMessage userId={message.user.id} date={message.content.date} />
-          </View>
+          {message.content.message && (
+            <View style={styles.messageContainer}>
+              <MessageText
+                isUserMessage={isUserMessage}
+                text={message.content.message}
+              />
+              <DateMessage
+                userId={message.user.id}
+                date={message.content.date}
+              />
+            </View>
+          )}
         </View>
       </ThemedView>
     </View>
