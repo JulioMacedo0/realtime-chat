@@ -1,15 +1,19 @@
 import { ContentPhotoPayload } from "@/@types/types";
 import { ImagePreview } from "./ImagePreview";
-import { View } from "react-native";
-import { MessageText } from "./MessageText";
-import { DateMessage } from "./DateMessage";
 import { ImageOriginal } from "./ImageOriginal";
+import { USER_ID } from "@/supabase/supabase";
 
-export const PhotoMessage = (message: ContentPhotoPayload) => {
+type Props = {
+  message: ContentPhotoPayload;
+};
+
+export const PhotoMessage = ({ message }: Props) => {
+  const isUserMessage = message.user.id == USER_ID;
+
   return (
     <>
-      {message.content.url ? (
-        <ImageOriginal imgUrl={message.content.url} />
+      {isUserMessage ? (
+        <ImageOriginal imgUrl={message.content.meta.localUri} />
       ) : (
         <ImagePreview uri={message.content.previewUrl} />
       )}
