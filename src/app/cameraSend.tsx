@@ -1,35 +1,35 @@
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
   useColorScheme,
 } from "react-native";
-
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { IconApp } from "@/components";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { IFormInput, userID } from "./(tabs)";
+import { ContentPayload, userID } from "./(tabs)";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { supabase } from "@/supabase/supabase";
 import * as Crypto from "expo-crypto";
 import { useState } from "react";
-import { decode } from "base64-arraybuffer";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { contentType } from "@/@types/types";
+import { useMessagesActions } from "@/store/messageStore";
+import { getFileExtension } from "@/helpers/getFileExtension";
+import { getFileNameWithExtension } from "@/helpers/getFileNameWithExtension";
+import { getContentType } from "@/helpers/getContentType";
+import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import { decode } from "base64-arraybuffer";
 export default function CameraSend() {
   const { imgUrl, type } = useLocalSearchParams();
 
   const [loading, setLoading] = useState(false);
+  const { addMessage } = useMessagesActions();
   const colorScheme = useColorScheme();
   const goBack = () => {
     if (router.canGoBack()) {
@@ -37,35 +37,41 @@ export default function CameraSend() {
     }
   };
 
-  const sendMessage = async (payload: IFormInput) => {
-    const resp = await supabase.channel("public:chat").send({
-      type: "broadcast",
-      event: "message",
-      payload,
-    });
-  };
-
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+  const onSubmit: SubmitHandler<ContentPayload> = async (data) => {
+    let url = "";
     setLoading(true);
-    console.log(data.content.message);
-    try {
-      const fileName = imgUrl.split("/").pop();
-      const fileType = fileName.split(".").pop();
-      let url = "";
-      const id = Crypto.randomUUID();
+    const previewImg = await manipulateAsync(
+      imgUrl,
+      [
+        {
+          resize: {
+            width: 436,
+            height: 436 * (3 / 4),
+          },
+        },
+      ],
+      {
+        compress: 0.1,
+        format: SaveFormat.JPEG,
+        base64: true,
+      }
+    );
 
-      const base64 = await FileSystem.readAsStringAsync(imgUrl, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+    const fileExtension = getFileExtension(previewImg.uri);
+    const fileName = getFileNameWithExtension(previewImg.uri);
+    const contentType = getContentType(fileExtension);
+    const base64 = previewImg.base64;
+
+    try {
+      const id = Crypto.randomUUID();
 
       if (type == "photo") {
         const { data, error } = await supabase.storage
           .from("realtimechat")
-          .upload(`chat/${fileName}`, decode(base64), {
+          .upload(`chat/preview_${fileName}`, decode(base64), {
             cacheControl: "3600",
             upsert: false,
-            contentType: `image/${fileType}`,
-            duplex: "",
+            contentType: contentType,
           });
 
         if (!error) {
@@ -73,23 +79,26 @@ export default function CameraSend() {
         }
       }
 
-      console.log(url, "url");
-
       const now = new Date();
 
-      const payload: IFormInput = {
+      const payload: ContentPayload = {
         content: {
           ...data.content,
           id,
           type: type,
-          url,
+          previewUrl: url,
           date: now.toISOString(),
+          meta: {
+            localUri: imgUrl,
+          },
         },
         user: { ...data.user },
       };
-      await sendMessage(payload);
-      setLoading(false);
+
+      addMessage(payload);
+      console.log(url);
       reset();
+      setLoading(false);
       router.replace("(tabs)/");
     } catch (error) {
       console.log(error);
@@ -102,7 +111,7 @@ export default function CameraSend() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<IFormInput>({
+  } = useForm<ContentPayload>({
     defaultValues: {
       content: {
         message: "",
@@ -202,6 +211,7 @@ export default function CameraSend() {
           activeOpacity={0.7}
           style={[styles.sendButton]}
           onPress={handleSubmit(onSubmit)}
+          disabled={loading}
         >
           {loading ? (
             <ActivityIndicator />
