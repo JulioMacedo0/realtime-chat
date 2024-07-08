@@ -13,9 +13,8 @@ import {
 } from "react-native";
 import Animated from "react-native-reanimated";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import * as Crypto from "expo-crypto";
 
-import { supabase } from "@/supabase/supabase";
+import { USER_ID, supabase } from "@/supabase/supabase";
 
 import { Screen } from "@/components";
 import { Colors } from "@/constants/Colors";
@@ -31,14 +30,21 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import * as Crypto from "expo-crypto";
 import { Message } from "@/components/Message";
 import { useMessages, useMessagesActions } from "@/store/messageStore";
 import { Camera } from "@/components/Camera";
-import { TMessage, contentType } from "@/@types/types";
+import {
+  ContentPayload,
+  contentMessage,
+  contentPhoto,
+  contentType,
+  contentVideo,
+} from "@/@types/types";
 
 type BroadcastPayload = {
   event: string;
-  payload: TMessage;
+  payload: ContentPayload;
   type: string;
 };
 
@@ -53,39 +59,7 @@ type Clamp = {
   max: number;
 };
 
-type contentMessage = {
-  type: contentType.message;
-  id: string;
-  date: string;
-  message: string;
-};
-
-type contentPhoto = {
-  type: contentType.photo;
-  message: string;
-  id: string;
-  date: string;
-  url: string;
-};
-
-type contentVideo = {
-  type: contentType.video;
-  message: string;
-  id: string;
-  date: string;
-  url: string;
-};
-
-export interface IFormInput {
-  content: contentMessage | contentPhoto | contentVideo;
-  user: {
-    id: string;
-  };
-}
-
 type Gesture = GestureUpdateEvent<PanGestureHandlerEventPayload>;
-
-export const userID = Crypto.randomUUID();
 
 export default function HomeScreen() {
   function clamp({ val, min, max }: Clamp) {
@@ -97,13 +71,13 @@ export default function HomeScreen() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<IFormInput>({
+  } = useForm<ContentPayload>({
     defaultValues: {
       content: {
         message: "",
       },
       user: {
-        id: userID,
+        id: USER_ID,
       },
     },
   });
@@ -158,7 +132,9 @@ export default function HomeScreen() {
     const channel = supabase
       .channel("public:chat")
       .on("broadcast", { event: `message` }, (payload: BroadcastPayload) => {
-        addMessage(payload.payload);
+        if (USER_ID != payload.payload.user.id) {
+          addMessage(payload.payload);
+        }
       })
       .subscribe();
 
@@ -167,7 +143,8 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const sendMessage = async (payload: IFormInput) => {
+  const sendMessage = async (payload: ContentPayload) => {
+    addMessage(payload);
     const resp = await supabase.channel("public:chat").send({
       type: "broadcast",
       event: "message",
@@ -278,8 +255,8 @@ export default function HomeScreen() {
     item,
     index,
     separators,
-  }: ListRenderItemInfo<TMessage>) => (
-    <Message message={item} userId={userID} index={index} />
+  }: ListRenderItemInfo<ContentPayload>) => (
+    <Message message={item} index={index} />
   );
 
   const renderSeparator = () => (
@@ -292,13 +269,13 @@ export default function HomeScreen() {
 
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+  const onSubmit: SubmitHandler<ContentPayload> = (data) => {
     console.log(data);
 
     const now = new Date();
 
     const id = Crypto.randomUUID();
-    const payload: IFormInput = {
+    const payload: ContentPayload = {
       content: {
         ...data.content,
         id,
