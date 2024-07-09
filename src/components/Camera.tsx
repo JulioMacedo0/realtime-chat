@@ -1,7 +1,6 @@
 import { TouchableOpacity } from "react-native";
 import { IconApp } from "./IconApp/IconApp";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import { useState } from "react";
+import { useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
 export function Camera() {
   const [permission, requestPermission] = useCameraPermissions();
