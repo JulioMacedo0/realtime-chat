@@ -96,7 +96,7 @@ export function Message({ message, index }: Props) {
           {message.content.message && (
             <View style={styles.messageContainer}>
               <MessageText
-                isUserMessage={isUserMessage}
+                userId={message.user.id}
                 text={message.content.message}
               />
               <DateMessage
