@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
-  FlatList,
   TextInput,
   View,
   ListRenderItemInfo,
@@ -11,7 +10,11 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, {
+  useAnimatedRef,
+  useDerivedValue,
+  scrollTo,
+} from "react-native-reanimated";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 
 import { USER_ID, supabase } from "@/supabase/supabase";
@@ -65,6 +68,8 @@ export default function HomeScreen() {
   function clamp({ val, min, max }: Clamp) {
     return Math.min(Math.max(val, min), max);
   }
+
+  const animatedRef = useAnimatedRef<Animated.FlatList<ContentPayload>>();
 
   const {
     control,
@@ -134,6 +139,7 @@ export default function HomeScreen() {
       .on("broadcast", { event: `message` }, (payload: BroadcastPayload) => {
         if (USER_ID != payload.payload.user.id) {
           addMessage(payload.payload);
+          animatedRef.current?.scrollToEnd({ animated: true });
         }
       })
       .subscribe();
@@ -145,6 +151,7 @@ export default function HomeScreen() {
 
   const sendMessage = async (payload: ContentPayload) => {
     addMessage(payload);
+    animatedRef.current?.scrollToEnd({ animated: true });
     const resp = await supabase.channel("public:chat").send({
       type: "broadcast",
       event: "message",
@@ -298,7 +305,8 @@ export default function HomeScreen() {
   };
   return (
     <Screen>
-      <FlatList
+      <Animated.FlatList
+        ref={animatedRef}
         data={messages}
         renderItem={renderItem}
         ItemSeparatorComponent={renderSeparator}
