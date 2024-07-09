@@ -12,13 +12,12 @@ import { Image } from "expo-image";
 import { IconApp } from "@/components";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { ContentPayload, userID } from "./(tabs)";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { supabase } from "@/supabase/supabase";
+import { USER_ID, supabase } from "@/supabase/supabase";
 import * as Crypto from "expo-crypto";
 import { useState } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { contentType } from "@/@types/types";
+import { ContentPayload, contentType } from "@/@types/types";
 import { useMessagesActions } from "@/store/messageStore";
 import { getFileExtension } from "@/helpers/getFileExtension";
 import { getFileNameWithExtension } from "@/helpers/getFileNameWithExtension";
@@ -117,7 +116,7 @@ export default function CameraSend() {
         message: "",
       },
       user: {
-        id: userID,
+        id: USER_ID,
       },
     },
   });
