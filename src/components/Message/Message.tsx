@@ -15,15 +15,12 @@ import {
   ContentPayload,
   ContentPhotoPayload,
 } from "@/@types/types";
-import { useStorageUpload } from "@/hooks/useStorageUpload";
-import { DateMessage } from "./components/DateMessage";
-import { MessageText } from "./components/MessageText";
+
 import { USER_ID } from "@/supabase/supabase";
 import { PhotoMessage } from "./components/PhotoMessage";
 
 type Props = {
   message: ContentPayload;
-
   index: number;
 };
 
@@ -92,19 +89,6 @@ export function Message({ message, index }: Props) {
           )}
 
           {renderContent()}
-
-          {message.content.message && (
-            <View style={styles.messageContainer}>
-              <MessageText
-                userId={message.user.id}
-                text={message.content.message}
-              />
-              <DateMessage
-                userId={message.user.id}
-                date={message.content.date}
-              />
-            </View>
-          )}
         </View>
       </ThemedView>
     </View>
