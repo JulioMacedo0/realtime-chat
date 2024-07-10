@@ -1,51 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
-  TextInput,
   View,
   ListRenderItemInfo,
-  useColorScheme,
-  Pressable,
-  Alert,
-  TouchableOpacity,
   useWindowDimensions,
 } from "react-native";
-import Animated, {
-  useAnimatedRef,
-  useDerivedValue,
-  scrollTo,
-} from "react-native-reanimated";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import Animated, { useAnimatedRef } from "react-native-reanimated";
+import { SubmitHandler } from "react-hook-form";
 
 import { USER_ID, supabase } from "@/supabase/supabase";
 
 import { Screen } from "@/components";
-import { Colors } from "@/constants/Colors";
-import { IconApp } from "@/components/IconApp/IconApp";
-import {
-  GestureDetector,
-  Gesture,
-  GestureUpdateEvent,
-  PanGestureHandlerEventPayload,
-} from "react-native-gesture-handler";
-import {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+
 import * as Crypto from "expo-crypto";
 import { Message } from "@/components/Message";
 import { useMessages, useMessagesActions } from "@/store/messageStore";
-import { Camera } from "@/components/Camera";
-import {
-  ContentPayload,
-  contentMessage,
-  contentPhoto,
-  contentType,
-  contentVideo,
-} from "@/@types/types";
-import { Inputchat } from "@/components/InputChat";
-import { SendAudioButton } from "@/components/SendAudioButton";
+import { ContentPayload, contentType } from "@/@types/types";
+
+import { BottomChatInput } from "@/components/BottomChatInput";
 
 type BroadcastPayload = {
   event: string;
@@ -86,10 +58,6 @@ export default function HomeScreen() {
       event: "message",
       payload,
     });
-  };
-
-  const onMaxReached = () => {
-    Alert.alert("Limite máximo atingido!");
   };
 
   const renderItem = ({
@@ -137,10 +105,7 @@ export default function HomeScreen() {
         style={[styles.messageList]}
       />
 
-      <View style={styles.inputContainer}>
-        <Inputchat />
-        <SendAudioButton />
-      </View>
+      <BottomChatInput />
     </Screen>
   );
 }
@@ -155,11 +120,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
   input: {
     flex: 1,
     paddingVertical: 6,
