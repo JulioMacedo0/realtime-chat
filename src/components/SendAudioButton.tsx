@@ -1,12 +1,17 @@
 import { AnimatedPressable } from "@/constants/AnimatedComponents";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  BounceIn,
+  BounceOut,
+  ZoomIn,
+  ZoomOut,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 import { IconApp } from "./IconApp/IconApp";
 import { clamp } from "@/helpers/clamp";
+import { LayoutAnimation } from "react-native";
 
 export const SendAudioButton = () => {
   const scale = useSharedValue(1);
@@ -50,7 +55,6 @@ export const SendAudioButton = () => {
   let initialDirection: null | "x" | "y" = null;
   const TOLERANCE = 10;
   const panGesture = Gesture.Pan()
-
     .minDistance(1)
     .onBegin(() => {
       scale.value = withSpring(2.2, {
@@ -144,24 +148,27 @@ export const SendAudioButton = () => {
 
   return (
     <GestureDetector gesture={panGesture}>
-      <Animated.View style={animatedViewStyle}>
-        <AnimatedPressable
-          hitSlop={20}
-          onPress={() => console.log("send audio")}
-          // onPressOut={onPressOut}
-          style={[
-            {
-              backgroundColor: "#00af00",
-              padding: 10,
-              borderRadius: 999,
-              justifyContent: "center",
-              alignItems: "center",
-            },
-            animatedPressableStyle,
-          ]}
-        >
-          <IconApp lib="Ionicons" name={"mic"} color="#000" />
-        </AnimatedPressable>
+      <Animated.View entering={ZoomIn} exiting={ZoomOut}>
+        <Animated.View style={animatedViewStyle}>
+          <AnimatedPressable
+            hitSlop={20}
+            onPress={() => console.log("send audio")}
+            // onPressOut={onPressOut}
+
+            style={[
+              {
+                backgroundColor: "#00af00",
+                padding: 10,
+                borderRadius: 999,
+                justifyContent: "center",
+                alignItems: "center",
+              },
+              animatedPressableStyle,
+            ]}
+          >
+            <IconApp lib="Ionicons" name={"mic"} color="#000" />
+          </AnimatedPressable>
+        </Animated.View>
       </Animated.View>
     </GestureDetector>
   );
