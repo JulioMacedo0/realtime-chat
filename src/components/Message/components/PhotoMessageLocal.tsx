@@ -8,7 +8,10 @@ import { MessageText } from "./MessageText";
 import { DateMessage } from "./DateMessage";
 import { formatBytes } from "@/helpers/formatBytes";
 import { hexdecimalWithAlpha } from "@/helpers/hexdecimalWithAlpha";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Animated, { ZoomIn, ZoomOut } from "react-native-reanimated";
+import { IconApp } from "@/components/IconApp/IconApp";
+import { AnimatedTouchableOpacity } from "@/constants/AnimatedComponents";
 
 type Props = {
   message: ContentPhotoPayload;
@@ -23,44 +26,25 @@ const sendContentPhotoPayload = async (payload: ContentPhotoPayload) => {
   return resp;
 };
 
-export const PhotoMessage = ({ message }: Props) => {
-  const isUserMessage = message.user.id == USER_ID;
-
+export const PhotoMessageLocal = ({ message }: Props) => {
   const {
-    bytesTotal,
-    bytesUploaded,
-    error,
-    onLoading,
     startUpload,
     stopUpload,
-    uploadUrl,
+    bytesTotal,
+    bytesUploaded,
+    onLoading,
+    uploadSuccess,
   } = useStorageUpload({
     bucketName: "realtimechat",
     uri: message.content.meta.localUri,
   });
 
-  useEffect(() => {
-    if (uploadUrl) {
-      sendContentPhotoPayload({
-        ...message,
-        content: {
-          ...message.content,
-          url: uploadUrl,
-        },
-      });
-    }
-  }, [uploadUrl]);
-
   return (
     <View>
-      {message.content.url ? (
-        <ImageOriginal
-          imgUrl={
-            isUserMessage ? message.content.meta.localUri : message.content.url
-          }
-        />
-      ) : (
+      {!uploadSuccess ? (
         <ImagePreview uri={message.content.previewUrl} />
+      ) : (
+        <ImageOriginal imgUrl={message.content.meta.localUri} />
       )}
 
       {message.content.message ? (
@@ -83,8 +67,11 @@ export const PhotoMessage = ({ message }: Props) => {
         />
       )}
 
-      {bytesTotal != bytesUploaded && (
-        <View
+      {!uploadSuccess && (
+        <AnimatedTouchableOpacity
+          onPress={startUpload}
+          entering={ZoomIn}
+          exiting={ZoomOut}
           style={[
             {
               flexDirection: "row",
@@ -98,16 +85,19 @@ export const PhotoMessage = ({ message }: Props) => {
         >
           <View
             style={{
+              gap: 4,
+              flexDirection: "row",
               padding: 8,
               borderRadius: 15,
               backgroundColor: hexdecimalWithAlpha({ alpha: 0.4, hex: "#000" }),
             }}
           >
+            <IconApp lib="Ionicons" name="cloud-upload-outline" color="#fff" />
             <Text style={[styles.text]}>
               {formatBytes(bytesTotal)}/{formatBytes(bytesUploaded)}
             </Text>
           </View>
-        </View>
+        </AnimatedTouchableOpacity>
       )}
     </View>
   );

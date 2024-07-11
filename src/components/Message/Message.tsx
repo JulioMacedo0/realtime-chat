@@ -18,8 +18,9 @@ import {
 } from "@/@types/types";
 
 import { USER_ID } from "@/supabase/supabase";
-import { PhotoMessage } from "./components/PhotoMessage";
+import { PhotoMessageLocal } from "./components/PhotoMessageLocal";
 import { OnlyMessage } from "./components/OnlyMessage";
+import { PhotoMessageRemote } from "./components/PhotoMessageRemote";
 
 type Props = {
   message: ContentPayload;
@@ -48,7 +49,11 @@ export function Message({ message, index }: Props) {
   const renderContent = () => {
     switch (message.content.type) {
       case contentType.photo:
-        return <PhotoMessage message={message as ContentPhotoPayload} />;
+        return isUserMessage ? (
+          <PhotoMessageLocal message={message as ContentPhotoPayload} />
+        ) : (
+          <PhotoMessageRemote message={message as ContentPhotoPayload} />
+        );
       case contentType.message:
         return <OnlyMessage message={message as ContentMessagePayload} />;
       default:
