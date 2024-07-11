@@ -1,10 +1,19 @@
-import { AnimatedPressable } from "@/constants/AnimatedComponents";
+import {
+  AnimatedActivityIndicator,
+  AnimatedPressable,
+} from "@/constants/AnimatedComponents";
 import { IconApp } from "./IconApp/IconApp";
 import { PressableProps } from "react-native";
 import { ZoomIn, ZoomOut } from "react-native-reanimated";
 
-type Props = PressableProps & {};
-export const SendMessageButton = ({ style, ...rest }: Props) => {
+type Props = PressableProps & {
+  loading?: boolean;
+};
+export const SendMessageButton = ({
+  style,
+  loading = false,
+  ...rest
+}: Props) => {
   return (
     <AnimatedPressable
       entering={ZoomIn}
@@ -21,7 +30,11 @@ export const SendMessageButton = ({ style, ...rest }: Props) => {
       ]}
       {...rest}
     >
-      <IconApp lib="Ionicons" name={"send-sharp"} color="#000" />
+      {loading ? (
+        <AnimatedActivityIndicator />
+      ) : (
+        <IconApp lib="Ionicons" name={"send-sharp"} color="#000" />
+      )}
     </AnimatedPressable>
   );
 };
