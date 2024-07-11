@@ -15,9 +15,9 @@ export function useStorageUpload({ bucketName, uri }: Params) {
   const [bytesUploaded, setBytesUploaded] = useState(0);
   const [bytesTotal, setBytesTotal] = useState(0);
   const [error, setError] = useState<Error | tus.DetailedError | null>(null);
-  const [onLoading, setOnLoading] = useState(true);
+  const [onLoading, setOnLoading] = useState(false);
   const [uploadUrl, setUploadUrl] = useState<null | string>(null);
-
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileExtension = getFileExtension(uri);
   const fileName = getFileNameWithExtension(uri);
   const contentType = getContentType(fileExtension);
@@ -26,6 +26,7 @@ export function useStorageUpload({ bucketName, uri }: Params) {
 
   const startUpload = () => {
     if (!uploadRef.current) return;
+    setOnLoading(true);
     uploadRef.current.findPreviousUploads().then(function (previousUploads) {
       if (!uploadRef.current) return;
       if (previousUploads.length) {
@@ -41,60 +42,52 @@ export function useStorageUpload({ bucketName, uri }: Params) {
   };
 
   useEffect(() => {
-    const upload = new tus.Upload(
-      { uri },
-      {
-        endpoint: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
-        headers: {
-          authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_KEY}`,
-          "x-upsert": "true",
-        },
-        uploadDataDuringCreation: true,
-        removeFingerprintOnSuccess: true,
-        metadata: {
-          bucketName: bucketName,
-          objectName: `chat/${fileName}`,
-          contentType,
-          cacheControl: 3600,
-        },
-        chunkSize: 6 * 1024 * 1024,
-        onError: function (error) {
-          setError(error);
-          setOnLoading(false);
-          console.log("Failed because: " + error);
-        },
-        onProgress: function (bytesUploaded, bytesTotal) {
-          setBytesUploaded(bytesUploaded);
-          setBytesTotal(bytesTotal);
-          let percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-          console.log(bytesUploaded, bytesTotal, percentage + "%");
-        },
-        onSuccess: function () {
-          setOnLoading(false);
-          setUploadUrl(
-            `${process.env.EXPO_PUBLIC_SUPABASE_URL}/${process.env.EXPO_PUBLIC_SUPABASE_CHAT_BUCKET}/chat/${fileName}`
-          );
-          console.log("Download %s from %s", upload.file, upload.url);
-          console.log(upload, "upload success");
-        },
-      }
-    );
+    console.log("useEffect do hook =", getFileNameWithExtension(uri));
+    const upload = new tus.Upload({ uri } as any, {
+      endpoint: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
+      headers: {
+        authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_KEY}`,
+        "x-upsert": "true",
+      },
+      uploadDataDuringCreation: true,
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        bucketName: bucketName,
+        objectName: `chat/${fileName}`,
+        contentType,
+        cacheControl: "3600",
+      },
+      chunkSize: 6 * 1024 * 1024,
+      onError: function (error) {
+        setError(error);
+        setOnLoading(false);
+        console.log("Failed because: " + error);
+      },
+      onProgress: function (bytesUploaded, bytesTotal) {
+        setBytesUploaded(bytesUploaded);
+        setBytesTotal(bytesTotal);
+        let percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+        console.log(bytesUploaded, bytesTotal, percentage + "%");
+      },
+      onSuccess: function () {
+        setUploadSuccess(true);
+        setOnLoading(false);
+        setUploadUrl(
+          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/${process.env.EXPO_PUBLIC_SUPABASE_CHAT_BUCKET}/chat/${fileName}`
+        );
+        console.log("Download %s from %s", upload.file, upload.url);
+        console.log("upload success");
+      },
+    });
 
     uploadRef.current = upload;
-
-    upload.findPreviousUploads().then(function (previousUploads) {
-      if (previousUploads.length) {
-        upload.resumeFromPreviousUpload(previousUploads[0]);
-      }
-      upload.start();
-    });
 
     return () => {
       if (uploadRef.current) {
         uploadRef.current.abort();
       }
     };
-  }, [bucketName, uri]);
+  }, []);
 
   return {
     bytesTotal,
@@ -102,6 +95,7 @@ export function useStorageUpload({ bucketName, uri }: Params) {
     onLoading,
     error,
     uploadUrl,
+    uploadSuccess,
     startUpload,
     stopUpload,
   };
