@@ -1,23 +1,40 @@
-import { ContentPayload, ContentPhotoPayload } from "@/@types/types";
+import { ContentPhotoPayload } from "@/@types/types";
 import { ImagePreview } from "./ImagePreview";
-import { ImageOriginal } from "./ImageOriginal";
-import { USER_ID, supabase } from "@/supabase/supabase";
-import { useStorageUpload } from "@/hooks/useStorageUpload";
+
 import { View, StyleSheet, Text } from "react-native";
 import { MessageText } from "./MessageText";
 import { DateMessage } from "./DateMessage";
-import { formatBytes } from "@/helpers/formatBytes";
 import { hexdecimalWithAlpha } from "@/helpers/hexdecimalWithAlpha";
-import { useEffect, useState } from "react";
+import { formatBytes } from "@/helpers/formatBytes";
+import { IconApp } from "@/components/IconApp/IconApp";
+import { AnimatedTouchableOpacity } from "@/constants/AnimatedComponents";
+import { ZoomIn, ZoomOut } from "react-native-reanimated";
+import { useState } from "react";
+import { ImageOriginal } from "./ImageOriginal";
 
 type Props = {
   message: ContentPhotoPayload;
 };
 
 export const PhotoMessageRemote = ({ message }: Props) => {
+  const [imgLoaded, setImgLoaded] = useState(false);
   return (
     <View>
-      <ImagePreview uri={message.content.previewUrl} />
+      {imgLoaded ? (
+        <ImageOriginal
+          placeholder={message.content.previewUrl}
+          source={message.content.url}
+          onLoadStart={() => {}}
+          onLoad={(event) => {
+            console.log(event);
+          }}
+          onLoadEnd={() => {
+            setImgLoaded(true);
+          }}
+        />
+      ) : (
+        <ImagePreview uri={message.content.previewUrl} />
+      )}
 
       {message.content.message ? (
         <View style={styles.messageContainer}>
@@ -39,8 +56,10 @@ export const PhotoMessageRemote = ({ message }: Props) => {
         />
       )}
 
-      {/* {bytesTotal != bytesUploaded && (
-        <View
+      {!imgLoaded && (
+        <AnimatedTouchableOpacity
+          entering={ZoomIn}
+          exiting={ZoomOut}
           style={[
             {
               flexDirection: "row",
@@ -54,17 +73,20 @@ export const PhotoMessageRemote = ({ message }: Props) => {
         >
           <View
             style={{
+              flexDirection: "row",
+              gap: 4,
+              alignContent: "center",
+              justifyContent: "center",
               padding: 8,
               borderRadius: 15,
               backgroundColor: hexdecimalWithAlpha({ alpha: 0.4, hex: "#000" }),
             }}
           >
-            <Text style={[styles.text]}>
-              {formatBytes(bytesTotal)}/{formatBytes(bytesUploaded)}
-            </Text>
+            <IconApp lib="Ionicons" name="cloud-done-outline" color="#fff" />
+            <Text style={[styles.text]}>Download</Text>
           </View>
-        </View>
-      )} */}
+        </AnimatedTouchableOpacity>
+      )}
     </View>
   );
 };
