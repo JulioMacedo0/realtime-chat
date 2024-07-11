@@ -10,7 +10,7 @@ import {
 import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { IconApp } from "@/components";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { USER_ID, supabase } from "@/supabase/supabase";
@@ -24,9 +24,10 @@ import { getFileNameWithExtension } from "@/helpers/getFileNameWithExtension";
 import { getContentType } from "@/helpers/getContentType";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { decode } from "base64-arraybuffer";
+import { StackActions } from "@react-navigation/native";
 export default function CameraSend() {
   const { imgUrl, type } = useLocalSearchParams();
-
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const { addMessage } = useMessagesActions();
   const colorScheme = useColorScheme();
@@ -98,7 +99,7 @@ export default function CameraSend() {
       console.log(url);
       reset();
       setLoading(false);
-      router.replace("(tabs)/");
+      navigation.dispatch(StackActions.pop(2));
     } catch (error) {
       console.log(error);
       alert(error);
