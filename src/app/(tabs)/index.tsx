@@ -6,16 +6,14 @@ import {
   useWindowDimensions,
 } from "react-native";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
-import { SubmitHandler } from "react-hook-form";
 
 import { USER_ID, supabase } from "@/supabase/supabase";
 
 import { Screen } from "@/components";
 
-import * as Crypto from "expo-crypto";
 import { Message } from "@/components/Message";
 import { useMessages, useMessagesActions } from "@/store/messageStore";
-import { ContentPayload, contentType } from "@/@types/types";
+import { ContentPayload } from "@/@types/types";
 
 import { BottomChatInput } from "@/components/BottomChatInput";
 
@@ -50,16 +48,6 @@ export default function HomeScreen() {
     };
   }, []);
 
-  const sendMessage = async (payload: ContentPayload) => {
-    addMessage(payload);
-    animatedRef.current?.scrollToEnd({ animated: true });
-    const resp = await supabase.channel("public:chat").send({
-      type: "broadcast",
-      event: "message",
-      payload,
-    });
-  };
-
   const renderItem = ({
     item,
     index,
@@ -75,24 +63,6 @@ export default function HomeScreen() {
       }}
     />
   );
-
-  const onSubmit: SubmitHandler<ContentPayload> = (data) => {
-    console.log(data);
-
-    const now = new Date();
-
-    const id = Crypto.randomUUID();
-    const payload: ContentPayload = {
-      content: {
-        ...data.content,
-        id,
-        type: contentType.message,
-        date: now.toISOString(),
-      },
-      user: { ...data.user },
-    };
-    sendMessage(payload);
-  };
 
   return (
     <Screen>
@@ -119,7 +89,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 16,
   },
-
   input: {
     flex: 1,
     paddingVertical: 6,
