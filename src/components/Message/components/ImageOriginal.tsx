@@ -1,21 +1,24 @@
 import { TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
+import { Image, ImageProps } from "expo-image";
 import { StyleSheet } from "react-native";
 import { router } from "expo-router";
-type Props = {
-  imgUrl: string;
-};
+type Props = ImageProps & {};
 
-export const ImageOriginal = ({ imgUrl }: Props) => {
+export const ImageOriginal = ({ source, ...rest }: Props) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        router.push(`/contentView?imgUrl=${imgUrl}`);
+        router.push(`/contentView?imgUrl=${source}`);
       }}
       activeOpacity={0.7}
       style={styles.imageContainer}
     >
-      <Image source={imgUrl} contentFit="cover" style={styles.image} />
+      <Image
+        contentFit="cover"
+        style={styles.image}
+        source={source}
+        {...rest}
+      />
     </TouchableOpacity>
   );
 };
