@@ -34,17 +34,29 @@ export const PhotoMessageLocal = ({ message }: Props) => {
     bytesUploaded,
     onLoading,
     uploadSuccess,
+    uploadUrl,
   } = useStorageUpload({
     bucketName: "realtimechat",
     uri: message.content.meta.localUri,
   });
+
+  useEffect(() => {
+    if (!uploadUrl) return;
+    sendContentPhotoPayload({
+      ...message,
+      content: {
+        ...message.content,
+        url: uploadUrl,
+      },
+    });
+  }, [uploadUrl]);
 
   return (
     <View>
       {!uploadSuccess ? (
         <ImagePreview uri={message.content.previewUrl} />
       ) : (
-        <ImageOriginal imgUrl={message.content.meta.localUri} />
+        <ImageOriginal source={message.content.meta.localUri} />
       )}
 
       {message.content.message ? (
@@ -69,7 +81,9 @@ export const PhotoMessageLocal = ({ message }: Props) => {
 
       {!uploadSuccess && (
         <AnimatedTouchableOpacity
-          onPress={startUpload}
+          onPress={() => {
+            startUpload();
+          }}
           entering={ZoomIn}
           exiting={ZoomOut}
           style={[
@@ -92,10 +106,17 @@ export const PhotoMessageLocal = ({ message }: Props) => {
               backgroundColor: hexdecimalWithAlpha({ alpha: 0.4, hex: "#000" }),
             }}
           >
-            <IconApp lib="Ionicons" name="cloud-upload-outline" color="#fff" />
-            <Text style={[styles.text]}>
-              {formatBytes(bytesTotal)}/{formatBytes(bytesUploaded)}
-            </Text>
+            {onLoading ? (
+              <Text style={[styles.text]}>
+                {formatBytes(bytesTotal)}/{formatBytes(bytesUploaded)}
+              </Text>
+            ) : (
+              <IconApp
+                lib="Ionicons"
+                name="cloud-upload-outline"
+                color="#fff"
+              />
+            )}
           </View>
         </AnimatedTouchableOpacity>
       )}
