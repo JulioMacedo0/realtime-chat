@@ -62,6 +62,7 @@ export const PhotoMessageRemote = ({ message }: Props) => {
             position: "absolute",
             bottom: 0,
             right: 5,
+            color: "#fff",
           }}
           userId={message.user.id}
           date={message.content.date}
