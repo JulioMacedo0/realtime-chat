@@ -21,6 +21,7 @@ export type contentPhoto = contentBase & {
   previewUrl: string;
   meta: {
     localUri: string;
+    localUriPreview: string;
   };
 };
 

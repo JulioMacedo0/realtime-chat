@@ -54,7 +54,7 @@ export const PhotoMessageLocal = ({ message }: Props) => {
   return (
     <View>
       {!uploadSuccess ? (
-        <ImagePreview uri={message.content.previewUrl} />
+        <ImagePreview uri={message.content.meta.localUriPreview} />
       ) : (
         <ImageOriginal source={message.content.meta.localUri} />
       )}
