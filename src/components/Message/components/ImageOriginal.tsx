@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import { router } from "expo-router";
 type Props = ImageProps & {};
 
-export const ImageOriginal = ({ source, ...rest }: Props) => {
+export const ImageOriginal = ({ source, style, ...rest }: Props) => {
   return (
     <TouchableOpacity
       onPress={() => {
@@ -15,7 +15,7 @@ export const ImageOriginal = ({ source, ...rest }: Props) => {
     >
       <Image
         contentFit="cover"
-        style={styles.image}
+        style={[styles.image, style]}
         source={source}
         {...rest}
       />
