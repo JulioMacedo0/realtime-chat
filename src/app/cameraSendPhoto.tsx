@@ -17,7 +17,7 @@ import { USER_ID, supabase } from "@/supabase/supabase";
 import * as Crypto from "expo-crypto";
 import { useState } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { ContentPayload, contentType } from "@/@types/types";
+import { ContentPayload, ContentType } from "@/@types/types";
 import { useMessagesActions } from "@/store/messageStore";
 import { getFileExtension } from "@/helpers/getFileExtension";
 import { getFileNameWithExtension } from "@/helpers/getFileNameWithExtension";
@@ -25,9 +25,10 @@ import { getContentType } from "@/helpers/getContentType";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { decode } from "base64-arraybuffer";
 import { StackActions } from "@react-navigation/native";
+import { CameraCapturedPicture } from "expo-camera";
 
 export default function CameraSendPhoto() {
-  const { imgUrl, type } = useLocalSearchParams();
+  const {} = useLocalSearchParams<CameraCapturedPicture>();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const { addMessage } = useMessagesActions();
@@ -38,7 +39,7 @@ export default function CameraSendPhoto() {
     }
   };
 
-  const onSubmit: SubmitHandler<ContentPayload> = async (data) => {
+  const onSubmit: SubmitHandler<ContentPayload> = async (message) => {
     let url = "";
     setLoading(true);
     const previewImg = await manipulateAsync(
@@ -66,34 +67,32 @@ export default function CameraSendPhoto() {
     try {
       const id = Crypto.randomUUID();
 
-      if (type == "photo") {
-        const { data, error } = await supabase.storage
-          .from("realtimechat")
-          .upload(`chat/preview_${fileName}`, decode(base64), {
-            cacheControl: "3600",
-            upsert: false,
-            contentType: contentType,
-          });
+      const { data, error } = await supabase.storage
+        .from("realtimechat")
+        .upload(`chat/preview_${fileName}`, decode(base64), {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: contentType,
+        });
 
-        if (!error) {
-          url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/${process.env.EXPO_PUBLIC_SUPABASE_CHAT_BUCKET}/${data.path}`;
-        }
+      if (!error) {
+        url = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/${process.env.EXPO_PUBLIC_SUPABASE_CHAT_BUCKET}/${data.path}`;
       }
 
       const now = new Date();
 
       const payload: ContentPayload = {
         content: {
-          ...data.content,
+          ...message.content,
           id,
-          type: type,
+          type: ContentType.photo,
           previewUrl: url,
           date: now.toISOString(),
           meta: {
             localUri: imgUrl,
           },
         },
-        user: { ...data.user },
+        user: { ...message.user },
       };
 
       addMessage(payload);
@@ -161,10 +160,10 @@ export default function CameraSendPhoto() {
           </View>
         </View>
 
-        {type == contentType.photo && (
+        {type == ContentType.photo && (
           <Image source={imgUrl} style={styles.photo} />
         )}
-        {type == contentType.video && <VideoPlayer uri={imgUrl} />}
+        {type == ContentType.video && <VideoPlayer uri={imgUrl} />}
       </View>
       <View style={styles.bottomContainer}>
         <View

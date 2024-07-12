@@ -4,7 +4,7 @@ import { IconApp } from "./IconApp/IconApp";
 
 import { Camera } from "./Camera";
 import { useForm, Controller } from "react-hook-form";
-import { ContentPayload, contentType } from "@/@types/types";
+import { ContentPayload, ContentType } from "@/@types/types";
 import { USER_ID } from "@/supabase/supabase";
 import { ToggleInputButtons } from "./ToggleInputButtons";
 
@@ -13,7 +13,7 @@ export const BottomChatInput = () => {
     defaultValues: {
       content: {
         message: "",
-        type: contentType.message,
+        type: ContentType.message,
       },
       user: {
         id: USER_ID,

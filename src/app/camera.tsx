@@ -7,7 +7,7 @@ import {
   FlashMode,
   CameraMode,
 } from "expo-camera";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,38 +21,39 @@ import Animated, {
 
 import { VerticalFlashModeCarrousel } from "@/components/VerticalFlashModeCarrousel";
 import { SpringConfig } from "react-native-reanimated/lib/typescript/animation/springUtils";
-import { contentType } from "@/@types/types";
+import { ContentType } from "@/@types/types";
 
 export default function Camera() {
+  const { navigate } = useNavigation();
   const springConf: SpringConfig = {
     damping: 8,
     stiffness: 150,
   };
   const [facing, setFacing] = useState<CameraType>("back");
-  const [type, setType] = useState<contentType>(contentType.photo);
+  const [type, setType] = useState<ContentType>(ContentType.photo);
   const [flashMode, setFlashMode] = useState<FlashMode>("off");
   const [cameraMode, setCameraMode] = useState<CameraMode>("picture");
   const cameraRef = useRef<CameraView | null>(null);
-  const animatedContentType = useSharedValue<contentType>(contentType.photo);
+  const animatedContentType = useSharedValue<ContentType>(ContentType.photo);
   const isRecoding = useSharedValue(false);
 
   const animatedStyle = useAnimatedStyle(() => {
     let width, height, borderRadius, backgroundColor;
     if (
-      animatedContentType.value === contentType.video &&
+      animatedContentType.value === ContentType.video &&
       isRecoding.value == false
     ) {
       width = withSpring(20, springConf);
       height = withSpring(20, springConf);
       borderRadius = withSpring(99, springConf);
       backgroundColor = withTiming("#fff");
-    } else if (animatedContentType.value === contentType.photo) {
+    } else if (animatedContentType.value === ContentType.photo) {
       width = withSpring(30, springConf);
       height = withSpring(30, springConf);
       borderRadius = withTiming(99);
       backgroundColor = withTiming("#fff");
     } else if (
-      animatedContentType.value === contentType.video &&
+      animatedContentType.value === ContentType.video &&
       isRecoding.value == true
     ) {
       width = withSpring(20, springConf);
@@ -74,15 +75,15 @@ export default function Camera() {
   };
 
   const setVideoMode = () => {
-    setType(contentType.video);
+    setType(ContentType.video);
     setCameraMode("video");
-    animatedContentType.value = contentType.video;
+    animatedContentType.value = ContentType.video;
   };
 
   const setPhotoMode = () => {
-    setType(contentType.photo);
+    setType(ContentType.photo);
     setCameraMode("picture");
-    animatedContentType.value = contentType.photo;
+    animatedContentType.value = ContentType.photo;
   };
 
   const takePhoto = async () => {
@@ -95,8 +96,10 @@ export default function Camera() {
         skipProcessing: true,
       };
       const data = await cameraRef.current.takePictureAsync(options);
-
-      router.push(`/cameraSendPhoto?imgUrl=${data?.uri}&type=${type}`);
+      if (!data) {
+        throw "Camera data is undefined";
+      }
+      navigate("cameraSnedPhoto", data);
     } catch (error) {
       console.error(error);
     }
@@ -131,11 +134,11 @@ export default function Camera() {
   };
 
   const handleCameraButton = () => {
-    if (type == contentType.photo) {
+    if (type == ContentType.photo) {
       takePhoto();
-    } else if (type == contentType.video && isRecoding.value == false) {
+    } else if (type == ContentType.video && isRecoding.value == false) {
       recordvideo();
-    } else if (type == contentType.video && isRecoding.value == true) {
+    } else if (type == ContentType.video && isRecoding.value == true) {
       stopRecrodVideo();
     }
   };
@@ -218,7 +221,7 @@ export default function Camera() {
             styles.textContainer,
             {
               backgroundColor:
-                type == contentType.video ? "#25d366" : "#ffffff1A",
+                type == ContentType.video ? "#25d366" : "#ffffff1A",
             },
           ]}
           onPress={setVideoMode}
@@ -235,7 +238,7 @@ export default function Camera() {
             styles.textContainer,
             {
               backgroundColor:
-                type == contentType.photo ? "#25d366" : "#ffffff1A",
+                type == ContentType.photo ? "#25d366" : "#ffffff1A",
             },
           ]}
           onPress={setPhotoMode}

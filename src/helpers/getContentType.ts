@@ -5,7 +5,7 @@
  * @returns {string} - The corresponding content type.
  */
 export const getContentType = (extension: string) => {
-  const contentTypes: { [key: string]: string } = {
+  const ContentTypes: { [key: string]: string } = {
     // Imagens
     jpg: "image/jpeg",
     jpeg: "image/jpeg",
@@ -49,11 +49,11 @@ export const getContentType = (extension: string) => {
     js: "application/javascript",
   };
 
-  const contentType = contentTypes[extension.toLowerCase()];
+  const ContentType = ContentTypes[extension.toLowerCase()];
 
-  if (!contentType) {
+  if (!ContentType) {
     throw new Error(`Unsupported file extension: ${extension}`);
   }
 
-  return contentType;
+  return ContentType;
 };

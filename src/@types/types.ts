@@ -1,4 +1,4 @@
-export enum contentType {
+export enum ContentType {
   message = "message",
   photo = "photo",
   video = "video",
@@ -10,12 +10,12 @@ type contentBase = {
 };
 
 export type contentMessage = contentBase & {
-  type: contentType.message;
+  type: ContentType.message;
   message: string;
 };
 
 export type contentPhoto = contentBase & {
-  type: contentType.photo;
+  type: ContentType.photo;
   message: string;
   url: string;
   previewUrl: string;
@@ -26,7 +26,7 @@ export type contentPhoto = contentBase & {
 };
 
 export type contentVideo = contentBase & {
-  type: contentType.video;
+  type: ContentType.video;
   message: string;
   url: string;
   previewUrl: string;

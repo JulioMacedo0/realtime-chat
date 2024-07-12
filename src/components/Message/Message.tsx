@@ -11,7 +11,7 @@ import { useMessages } from "@/store/messageStore";
 import { PorfilePicture } from "../ProfilePicture";
 
 import {
-  contentType,
+  ContentType,
   ContentPayload,
   ContentPhotoPayload,
   ContentMessagePayload,
@@ -48,13 +48,13 @@ export function Message({ message, index }: Props) {
 
   const renderContent = () => {
     switch (message.content.type) {
-      case contentType.photo:
+      case ContentType.photo:
         return isUserMessage ? (
           <PhotoMessageLocal message={message as ContentPhotoPayload} />
         ) : (
           <PhotoMessageRemote message={message as ContentPhotoPayload} />
         );
-      case contentType.message:
+      case ContentType.message:
         return <OnlyMessage message={message as ContentMessagePayload} />;
       default:
         return null;

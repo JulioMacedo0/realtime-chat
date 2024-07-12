@@ -20,7 +20,7 @@ export function useStorageUpload({ bucketName, uri }: Params) {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileExtension = getFileExtension(uri);
   const fileName = getFileNameWithExtension(uri);
-  const contentType = getContentType(fileExtension);
+  const ContentType = getContentType(fileExtension);
 
   const uploadRef = useRef<tus.Upload | null>(null);
 
@@ -54,7 +54,7 @@ export function useStorageUpload({ bucketName, uri }: Params) {
       metadata: {
         bucketName: bucketName,
         objectName: `chat/${fileName}`,
-        contentType,
+        ContentType,
         cacheControl: "3600",
       },
       chunkSize: 6 * 1024 * 1024,
