@@ -2,7 +2,7 @@ import { CameraCapturedPicture } from "expo-camera";
 
 export interface Screens {
   home: undefined;
-  cameraSnedPhoto: CameraCapturedPicture;
+  cameraSendPhoto: CameraCapturedPicture;
 }
 
 export declare global {
