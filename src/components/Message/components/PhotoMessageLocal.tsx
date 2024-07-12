@@ -53,11 +53,10 @@ export const PhotoMessageLocal = ({ message }: Props) => {
 
   return (
     <View>
-      {!uploadSuccess ? (
-        <ImagePreview uri={message.content.meta.localUriPreview} />
-      ) : (
-        <ImageOriginal source={message.content.meta.localUri} />
-      )}
+      <ImageOriginal
+        source={message.content.meta.localUri}
+        blurRadius={!uploadSuccess ? 1 : 0}
+      />
 
       {message.content.message ? (
         <View style={styles.messageContainer}>
