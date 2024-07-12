@@ -25,10 +25,21 @@ import { getContentType } from "@/helpers/getContentType";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { decode } from "base64-arraybuffer";
 import { StackActions } from "@react-navigation/native";
-import { CameraCapturedPicture } from "expo-camera";
+import { z } from "zod";
+import { useTypedLocalSearchParams } from "@/hooks/useTypedLocalSearchParams";
 
 export default function CameraSendPhoto() {
-  const {} = useLocalSearchParams<CameraCapturedPicture>();
+  const { uri, height, width } = useTypedLocalSearchParams(
+    z.object({
+      width: z.coerce.number(),
+      height: z.coerce.number(),
+      uri: z
+        .string({ required_error: "uri value is missing" })
+        .trim()
+        .min(1, "uri value missing"),
+    })
+  );
+
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const { addMessage } = useMessagesActions();
@@ -42,13 +53,15 @@ export default function CameraSendPhoto() {
   const onSubmit: SubmitHandler<ContentPayload> = async (message) => {
     let url = "";
     setLoading(true);
+    const newWidth = 436;
+    const newHeight = newWidth * (height / width);
     const previewImg = await manipulateAsync(
-      imgUrl,
+      uri,
       [
         {
           resize: {
-            width: 436,
-            height: 436 * (3 / 4),
+            width: newWidth,
+            height: newHeight,
           },
         },
       ],
@@ -63,6 +76,7 @@ export default function CameraSendPhoto() {
     const fileName = getFileNameWithExtension(previewImg.uri);
     const contentType = getContentType(fileExtension);
     const base64 = previewImg.base64;
+    if (!base64) throw "Invalid base64";
 
     try {
       const id = Crypto.randomUUID();
@@ -89,7 +103,7 @@ export default function CameraSendPhoto() {
           previewUrl: url,
           date: now.toISOString(),
           meta: {
-            localUri: imgUrl,
+            localUri: uri,
           },
         },
         user: { ...message.user },
@@ -160,10 +174,7 @@ export default function CameraSendPhoto() {
           </View>
         </View>
 
-        {type == ContentType.photo && (
-          <Image source={imgUrl} style={styles.photo} />
-        )}
-        {type == ContentType.video && <VideoPlayer uri={imgUrl} />}
+        <Image source={uri} style={styles.photo} />
       </View>
       <View style={styles.bottomContainer}>
         <View
