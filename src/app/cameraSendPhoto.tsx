@@ -25,7 +25,8 @@ import { getContentType } from "@/helpers/getContentType";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { decode } from "base64-arraybuffer";
 import { StackActions } from "@react-navigation/native";
-export default function CameraSend() {
+
+export default function CameraSendPhoto() {
   const { imgUrl, type } = useLocalSearchParams();
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);

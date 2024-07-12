@@ -45,7 +45,7 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="cameraSend"
+          name="cameraSendPhoto"
           options={{
             headerShown: false,
             animation: "fade",

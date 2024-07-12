@@ -96,7 +96,7 @@ export default function Camera() {
       };
       const data = await cameraRef.current.takePictureAsync(options);
 
-      router.push(`/cameraSend?imgUrl=${data?.uri}&type=${type}`);
+      router.push(`/cameraSendPhoto?imgUrl=${data?.uri}&type=${type}`);
     } catch (error) {
       console.error(error);
     }
@@ -119,7 +119,7 @@ export default function Camera() {
       isRecoding.value = true;
       const data = await cameraRef.current.recordAsync({});
       console.log(data?.uri);
-      router.push(`/cameraSend?imgUrl=${data?.uri}&type=${type}`);
+      router.push(`/cameraSendPhoto?imgUrl=${data?.uri}&type=${type}`);
     } catch (error) {
       console.error(error);
     }
