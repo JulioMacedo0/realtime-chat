@@ -92,14 +92,15 @@ export default function Camera() {
     try {
       const options: CameraPictureOptions = {
         quality: 0.5,
-        base64: true,
+        base64: false,
         skipProcessing: true,
       };
       const data = await cameraRef.current.takePictureAsync(options);
       if (!data) {
         throw "Camera data is undefined";
       }
-      navigate("cameraSnedPhoto", data);
+
+      navigate("cameraSendPhoto", data);
     } catch (error) {
       console.error(error);
     }
