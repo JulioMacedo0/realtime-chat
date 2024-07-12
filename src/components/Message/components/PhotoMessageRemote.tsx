@@ -18,24 +18,36 @@ type Props = {
 
 export const PhotoMessageRemote = ({ message }: Props) => {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgLoading, setimgLoading] = useState(false);
+  const [bytesUploaded, setBytesUploaded] = useState(0);
+  const [bytesTotal, setBytesTotal] = useState(0);
+  const [showRealImg, setShowRealImg] = useState(false);
   return (
     <View>
-      {imgLoaded ? (
+      {!imgLoaded && <ImagePreview uri={message.content.previewUrl} />}
+      {showRealImg && (
         <ImageOriginal
-          placeholder={message.content.previewUrl}
-          source={message.content.url}
-          onLoadStart={() => {}}
-          onLoad={(event) => {
-            console.log(event);
+          style={{
+            height: imgLoaded ? undefined : 1,
+            opacity: imgLoaded ? 1 : 0,
           }}
-          onLoadEnd={() => {
+          onLoadStart={() => {
+            setimgLoading(true);
+          }}
+          onProgress={(event) => {
+            setBytesTotal(event.total);
+            setBytesUploaded(event.loaded);
+          }}
+          onLoad={() => {
             setImgLoaded(true);
           }}
+          onError={(event) => {
+            alert(`Erro on loading Imagem: ${event.error}`);
+            setimgLoading(false);
+          }}
+          source={message.content.url}
         />
-      ) : (
-        <ImagePreview uri={message.content.previewUrl} />
       )}
-
       {message.content.message ? (
         <View style={styles.messageContainer}>
           <MessageText
@@ -58,6 +70,7 @@ export const PhotoMessageRemote = ({ message }: Props) => {
 
       {!imgLoaded && (
         <AnimatedTouchableOpacity
+          onPress={() => setShowRealImg(true)}
           entering={ZoomIn}
           exiting={ZoomOut}
           style={[
@@ -82,8 +95,20 @@ export const PhotoMessageRemote = ({ message }: Props) => {
               backgroundColor: hexdecimalWithAlpha({ alpha: 0.4, hex: "#000" }),
             }}
           >
-            <IconApp lib="Ionicons" name="cloud-done-outline" color="#fff" />
-            <Text style={[styles.text]}>Download</Text>
+            {imgLoading ? (
+              <Text style={[styles.text]}>
+                {formatBytes(bytesTotal)}/{formatBytes(bytesUploaded)}
+              </Text>
+            ) : (
+              <>
+                <IconApp
+                  lib="Ionicons"
+                  name="cloud-done-outline"
+                  color="#fff"
+                />
+                <Text style={[styles.text]}>Download</Text>
+              </>
+            )}
           </View>
         </AnimatedTouchableOpacity>
       )}
