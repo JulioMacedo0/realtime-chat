@@ -1,14 +1,16 @@
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { Inputchat } from "./InputChat";
 import { IconApp } from "./IconApp/IconApp";
-
 import { Camera } from "./Camera";
 import { useForm, Controller } from "react-hook-form";
 import { ContentPayload, ContentType } from "@/@types/types";
 import { USER_ID } from "@/supabase/supabase";
 import { ToggleInputButtons } from "./ToggleInputButtons";
+import { PaperClipIcon } from "./PaperclipIcon";
 
-export const BottomChatInput = () => {
+type Props = {};
+
+export const BottomChatInput = ({}: Props) => {
   const { control } = useForm<ContentPayload>({
     defaultValues: {
       content: {
@@ -36,16 +38,7 @@ export const BottomChatInput = () => {
                 <IconApp lib="FontAwesome6" name="face-laugh" color="#ccc" />
               </TouchableOpacity>
             }
-            suffixs={[
-              <TouchableOpacity activeOpacity={0.4}>
-                <IconApp
-                  lib="MaterialCommunityIcons"
-                  name="paperclip"
-                  color="#ccc"
-                />
-              </TouchableOpacity>,
-              <Camera />,
-            ]}
+            suffixs={[<PaperClipIcon />, <Camera />]}
           />
         )}
       />
