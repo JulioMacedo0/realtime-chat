@@ -21,6 +21,7 @@ type BroadcastPayload = {
 export default function HomeScreen() {
   console.log("HomeScreen");
   const animatedRef = useAnimatedRef<Animated.FlatList<ContentPayload>>();
+
   const { addMessage } = useMessagesActions();
 
   useEffect(() => {
@@ -55,6 +56,11 @@ const styles = StyleSheet.create({
   messageList: {
     flex: 1,
     marginBottom: 16,
+  },
+  contentContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   input: {
     flex: 1,
