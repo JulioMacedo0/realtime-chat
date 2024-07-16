@@ -1,12 +1,13 @@
 import React, { useCallback, forwardRef, useMemo } from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import { Easing } from "react-native-reanimated";
 
 type Props = {};
 
 export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   // variables
-  const snapPoints = useMemo(() => ["40%", "70%", "100%"], []);
+  const snapPoints = useMemo(() => ["60%"], []);
 
   // callbacks
 
@@ -21,6 +22,10 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
+      animationConfigs={{
+        damping: 16,
+        stiffness: 180,
+      }}
     >
       <BottomSheetView style={styles.contentContainer}>
         <Text>Awesome 🎉</Text>
