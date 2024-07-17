@@ -30,7 +30,7 @@ export const ExpoCamera = () => {
   };
   const [facing, setFacing] = useState<CameraType>("back");
   const [type, setType] = useState<ContentType>(ContentType.photo);
-
+  const [flashMode, setFlashMode] = useState<FlashMode>("off");
   const [cameraMode, setCameraMode] = useState<CameraMode>("picture");
   const cameraRef = useRef<CameraView | null>(null);
   const animatedContentType = useSharedValue<ContentType>(ContentType.photo);
