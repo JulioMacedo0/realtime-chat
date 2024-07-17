@@ -194,6 +194,5 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     padding: 12,
-    borderRadius: 16,
   },
 });
