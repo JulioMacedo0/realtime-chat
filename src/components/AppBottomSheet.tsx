@@ -14,13 +14,15 @@ import { BottomSheetButton } from "./BottomSheetButton";
 import { IconApp } from "./IconApp/IconApp";
 import { BottomSheetDefaultHandleProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetHandle/types";
 import { Colors } from "@/constants/Colors";
+import { ScrollView } from "react-native-gesture-handler";
+import { VisionCamera } from "./VisionCamera";
 
 type Props = {};
 
 export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const colorScheme = useColorScheme();
 
-  const snapPoints = useMemo(() => ["60%", "90%"], []);
+  const snapPoints = useMemo(() => ["55%", "90%"], []);
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log("handleSheetChanges", index);
@@ -30,23 +32,25 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
     ({ ...props }: BottomSheetFooterProps) => {
       return (
         <BottomSheetFooter {...props}>
-          <BottomSheetScrollView
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            style={{
+          <ScrollView
+            contentContainerStyle={{
+              flex: 1,
+              flexDirection: "row",
               paddingHorizontal: 16,
               paddingVertical: 6,
               backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
-              flexDirection: "row",
-              gap: 8,
+            }}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            style={{
+              flex: 1,
               borderTopColor: "#ccc",
               borderTopWidth: 0.8,
-              flex: 1,
             }}
           >
             <BottomSheetButton
               isSelected
-              Name="Gallery"
+              name="Gallery"
               bgIconColor="#24A1DE"
               Icon={
                 <IconApp
@@ -59,7 +63,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
             />
             <BottomSheetButton
               isSelected
-              Name="Wallet"
+              name="Wallet"
               bgIconColor="#24A1DE"
               Icon={
                 <IconApp size={30} lib="Ionicons" name="wallet" color="#fff" />
@@ -67,7 +71,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
             />
             <BottomSheetButton
               isSelected
-              Name="File"
+              name="File"
               bgIconColor="#24A1DE"
               Icon={
                 <IconApp
@@ -80,7 +84,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
             />
             <BottomSheetButton
               isSelected
-              Name="Location"
+              name="Location"
               bgIconColor="#50C878"
               Icon={
                 <IconApp
@@ -93,13 +97,13 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
             />
             <BottomSheetButton
               isSelected
-              Name="Contact"
+              name="Contact"
               bgIconColor="#FFD700"
               Icon={
                 <IconApp size={30} lib="FontAwesome" name="user" color="#fff" />
               }
             />
-          </BottomSheetScrollView>
+          </ScrollView>
         </BottomSheetFooter>
       );
     },
@@ -167,7 +171,14 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
           },
         ]}
       >
-        <Text>Awesome 🎉</Text>
+        <View
+          style={{
+            width: 120,
+            height: 120,
+          }}
+        >
+          <VisionCamera />
+        </View>
       </BottomSheetView>
     </BottomSheetModal>
   );
@@ -182,6 +193,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    alignItems: "center",
+    padding: 12,
+    borderRadius: 16,
   },
 });
