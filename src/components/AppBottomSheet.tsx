@@ -174,7 +174,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       backdropComponent={BackdropComponent}
       footerComponent={FooterComponent}
       activeOffsetX={[-999, 999]}
-      activeOffsetY={[-10, 10]}
+      activeOffsetY={[-15, 15]}
       animationConfigs={{
         damping: 16,
         stiffness: 180,
