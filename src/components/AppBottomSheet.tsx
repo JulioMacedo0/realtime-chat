@@ -98,6 +98,9 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
               isSelected
               name="Contact"
               bgIconColor="#FFD700"
+              style={{
+                marginRight: 0,
+              }}
               Icon={
                 <IconApp size={30} lib="FontAwesome" name="user" color="#fff" />
               }
