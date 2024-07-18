@@ -34,16 +34,15 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
         <BottomSheetFooter {...props}>
           <ScrollView
             contentContainerStyle={{
-              flex: 1,
               flexDirection: "row",
               paddingHorizontal: 16,
               paddingVertical: 6,
+
               backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
             }}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             style={{
-              flex: 1,
               borderTopColor: "#ccc",
               borderTopWidth: 0.8,
             }}
@@ -103,6 +102,22 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
                 <IconApp size={30} lib="FontAwesome" name="user" color="#fff" />
               }
             />
+            <BottomSheetButton
+              isSelected
+              name="Music"
+              bgIconColor="#ff6961"
+              style={{
+                marginRight: 0,
+              }}
+              Icon={
+                <IconApp
+                  size={30}
+                  lib="AntDesign"
+                  name="caretright"
+                  color="#fff"
+                />
+              }
+            />
           </ScrollView>
         </BottomSheetFooter>
       );
@@ -158,6 +173,8 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       handleComponent={HandleComponent}
       backdropComponent={BackdropComponent}
       footerComponent={FooterComponent}
+      activeOffsetX={[-999, 999]}
+      activeOffsetY={[-15, 15]}
       animationConfigs={{
         damping: 16,
         stiffness: 180,
