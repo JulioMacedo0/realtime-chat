@@ -98,11 +98,24 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
               isSelected
               name="Contact"
               bgIconColor="#FFD700"
+              Icon={
+                <IconApp size={30} lib="FontAwesome" name="user" color="#fff" />
+              }
+            />
+            <BottomSheetButton
+              isSelected
+              name="Music"
+              bgIconColor="#ff6961"
               style={{
                 marginRight: 0,
               }}
               Icon={
-                <IconApp size={30} lib="FontAwesome" name="user" color="#fff" />
+                <IconApp
+                  size={30}
+                  lib="AntDesign"
+                  name="caretright"
+                  color="#fff"
+                />
               }
             />
           </ScrollView>
@@ -117,7 +130,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
         <BottomSheetHandle
           {...props}
           style={[
-            // style,
+            style,
             {
               backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
               borderTopLeftRadius: 15,
@@ -198,6 +211,5 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     padding: 12,
-    borderRadius: 16,
   },
 });
