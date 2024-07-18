@@ -1,9 +1,7 @@
-import {
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from "@gorhom/bottom-sheet";
+import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { ReactNode } from "react";
-import { View, Text, ViewProps } from "react-native";
+import { Text, ViewProps } from "react-native";
+import Animated, { BounceIn } from "react-native-reanimated";
 
 type Props = ViewProps & {
   isSelected: boolean;
@@ -20,7 +18,8 @@ export const BottomSheetButton = ({
   ...props
 }: Props) => {
   return (
-    <View
+    <Animated.View
+      entering={BounceIn.delay(150)}
       {...props}
       style={[
         {
@@ -48,6 +47,6 @@ export const BottomSheetButton = ({
       </TouchableOpacity>
 
       <Text style={{ color: isSelected ? bgIconColor : "#ccc" }}>{name}</Text>
-    </View>
+    </Animated.View>
   );
 };
