@@ -34,16 +34,15 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
         <BottomSheetFooter {...props}>
           <ScrollView
             contentContainerStyle={{
-              flex: 1,
               flexDirection: "row",
               paddingHorizontal: 16,
               paddingVertical: 6,
+
               backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
             }}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
             style={{
-              flex: 1,
               borderTopColor: "#ccc",
               borderTopWidth: 0.8,
             }}
@@ -115,7 +114,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
         <BottomSheetHandle
           {...props}
           style={[
-            style,
+            // style,
             {
               backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
               borderTopLeftRadius: 15,
