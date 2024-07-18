@@ -3,27 +3,33 @@ import {
   TouchableWithoutFeedback,
 } from "@gorhom/bottom-sheet";
 import { ReactNode } from "react";
-import { View, Text } from "react-native";
+import { View, Text, ViewProps } from "react-native";
 
-type Props = {
+type Props = ViewProps & {
   isSelected: boolean;
   Icon: ReactNode;
   bgIconColor: string;
   name: string;
 };
 export const BottomSheetButton = ({
+  style,
   Icon,
   name,
   isSelected,
   bgIconColor,
+  ...props
 }: Props) => {
   return (
     <View
-      style={{
-        justifyContent: "center",
-        alignItems: "center",
-        marginRight: 40,
-      }}
+      {...props}
+      style={[
+        {
+          justifyContent: "center",
+          alignItems: "center",
+          marginRight: 40,
+        },
+        style,
+      ]}
     >
       <TouchableOpacity
         onPress={() => console.log(name)}
