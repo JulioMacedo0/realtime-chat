@@ -21,6 +21,8 @@ import { Colors } from "@/constants/Colors";
 import { ScrollView } from "react-native-gesture-handler";
 import * as MediaLibrary from "expo-media-library";
 import { GalleryBottomSheet } from "./GalleryBottomSheet";
+import { useSharedValue } from "react-native-reanimated";
+import { VisionCamera } from "./VisionCamera";
 
 type Props = {};
 
@@ -29,7 +31,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const [bottomFullScreen, setBottomFullScreen] = useState(false);
   const [scrollOnTop, setScrollOnTop] = useState(true);
   const colorScheme = useColorScheme();
-
+  const animatedPosition = useSharedValue(0);
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     setScrollOnTop(offsetY === 0);
@@ -184,8 +186,9 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
 
   return (
     <BottomSheetModal
+      animatedPosition={animatedPosition}
       ref={ref}
-      index={-1}
+      index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       handleComponent={HandleComponent}
@@ -209,6 +212,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
           },
         ]}
       >
+        <VisionCamera animatedPosition={animatedPosition} />
         <GalleryBottomSheet
           scrollEnabled={bottomFullScreen}
           onScroll={handleScroll}
