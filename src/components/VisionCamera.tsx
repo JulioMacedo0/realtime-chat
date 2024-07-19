@@ -1,5 +1,10 @@
 import { Camera, useCameraDevice } from "react-native-vision-camera";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { NoCameraErrorView } from "./NoCameraErrorView";
 import { IconApp } from "./IconApp/IconApp";
 import { VerticalFlashModeCarrousel } from "./VerticalFlashModeCarrousel";
@@ -7,6 +12,7 @@ import { router } from "expo-router";
 import { FlashMode } from "expo-camera";
 import { useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 export const VisionCamera = () => {
   const device = useCameraDevice("back");
   if (device == null) return <NoCameraErrorView />;
@@ -20,8 +26,16 @@ export const VisionCamera = () => {
     }
   };
 
+  const { width } = useWindowDimensions();
+  const itemSize = width / 3 - 5;
+
   return (
-    <>
+    <View
+      style={{
+        width: itemSize,
+        height: itemSize,
+      }}
+    >
       <View style={[styles.header, [{ top: top }]]}>
         <TouchableOpacity onPress={goBack}>
           <IconApp lib="AntDesign" name="close" color="#fff" />
@@ -34,15 +48,16 @@ export const VisionCamera = () => {
       </View>
       <Camera
         ref={camera}
-        style={styles.camera}
+        style={[styles.camera]}
         device={device}
         isActive={true}
       />
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {},
   camera: {
     flex: 1,
   },
