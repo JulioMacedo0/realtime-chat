@@ -10,8 +10,10 @@ import {
   NativeScrollEvent,
   useWindowDimensions,
 } from "react-native";
-import { Image } from "expo-image";
+
 import { VisionCamera } from "./VisionCamera";
+import { AssetItem } from "./AssetItem";
+import { mediaLibraryAsset } from "@/constants/App";
 
 type Props = Omit<FlatListProps<MediaLibrary.Asset>, "data" | "renderItem"> & {
   scrollEnabled: boolean;
@@ -21,11 +23,13 @@ export const GalleryBottomSheet = ({
   scrollEnabled,
   ...props
 }: Props) => {
-  const [mediaAssets, setMediaAssets] = useState<MediaLibrary.Asset[]>([]);
+  const [mediaAssets, setMediaAssets] = useState<MediaLibrary.Asset[]>([
+    mediaLibraryAsset,
+  ]);
   const [loading, setLoading] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [endcursor, setEndCursor] = useState(0);
-  const { width } = useWindowDimensions();
+
   useEffect(() => {
     fetchMedia();
   }, []);
@@ -34,6 +38,7 @@ export const GalleryBottomSheet = ({
     if (loading || !hasNextPage) return;
 
     setLoading(true);
+    const startTime = performance.now();
     const { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === "granted") {
       const media = await MediaLibrary.getAssetsAsync({
@@ -42,7 +47,9 @@ export const GalleryBottomSheet = ({
         mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
         after: endcursor.toString(),
       });
-      console.log(media);
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      console.log(`Execution time: ${duration} milliseconds`);
       setMediaAssets((prevMedia) => [...prevMedia, ...media.assets]);
       setHasNextPage(media.hasNextPage);
       setEndCursor((pervSate) => pervSate + parseInt(media.endCursor ?? "0"));
@@ -65,65 +72,28 @@ export const GalleryBottomSheet = ({
       </View>
     );
   };
-  const itemSize = width / 3;
+
   return (
     <FlatList
       {...props}
       numColumns={3}
-      style={[
-        {
-          backgroundColor: "#ee1",
-        },
-        style,
-      ]}
+      style={[style]}
       data={mediaAssets}
       scrollEnabled={scrollEnabled}
       keyExtractor={(item) => item.id}
       // ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
-      renderItem={({ item, index }) => {
-        if (item.mediaType == "photo") {
-          return (
-            <>
-              {index == 0 && (
-                <View
-                  style={{
-                    width: itemSize,
-                    height: itemSize,
-                  }}
-                >
-                  <VisionCamera />
-                </View>
-              )}
-              <Image
-                placeholder="'|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj['"
-                source={{ uri: item.uri }}
-                style={{ width: itemSize, height: itemSize }}
-              />
-            </>
-          );
-        } else {
-          return (
-            <>
-              {index == 0 && (
-                <View
-                  style={{
-                    width: itemSize,
-                    height: itemSize,
-                  }}
-                >
-                  <VisionCamera />
-                </View>
-              )}
-              <View style={{ width: itemSize, height: itemSize }}>
-                <Text>Video not suported yet</Text>
-              </View>
-            </>
-          );
-        }
-      }}
+      renderItem={({ index, item, separators }) => (
+        <AssetItem index={index} item={item} separators={separators} />
+      )}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
+      // Performance settings
+      removeClippedSubviews={true} // Unmount components when outside of window
+      initialNumToRender={2} // Reduce initial render amount
+      maxToRenderPerBatch={1} // Reduce number in each render batch
+      updateCellsBatchingPeriod={100} // Increase time between renders
+      windowSize={7} // Reduce the window size
     />
   );
 };
