@@ -1,17 +1,7 @@
 import * as MediaLibrary from "expo-media-library";
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  FlatListProps,
-  View,
-  Text,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  useWindowDimensions,
-} from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, FlatList, FlatListProps, View } from "react-native";
 
-import { VisionCamera } from "./VisionCamera";
 import { AssetItem } from "./AssetItem";
 import { mediaLibraryAsset } from "@/constants/App";
 
@@ -23,49 +13,51 @@ export const GalleryBottomSheet = ({
   scrollEnabled,
   ...props
 }: Props) => {
+  const mediaAssetsRef = useRef<MediaLibrary.Asset[]>([mediaLibraryAsset]);
+  const loadingRef = useRef(false);
+  const hasNextPageRef = useRef(true);
+  const endCursorRef = useRef(0);
+
   const [mediaAssets, setMediaAssets] = useState<MediaLibrary.Asset[]>([
     mediaLibraryAsset,
   ]);
-  const [loading, setLoading] = useState(false);
-  const [hasNextPage, setHasNextPage] = useState(true);
-  const [endcursor, setEndCursor] = useState(0);
 
   useEffect(() => {
     fetchMedia();
   }, []);
 
   const fetchMedia = async () => {
-    if (loading || !hasNextPage) return;
+    if (loadingRef.current || !hasNextPageRef.current) return;
 
-    setLoading(true);
+    loadingRef.current = true;
     const startTime = performance.now();
     const { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === "granted") {
       const media = await MediaLibrary.getAssetsAsync({
-        first: 30,
+        first: 32,
         sortBy: [MediaLibrary.SortBy.creationTime],
         mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
-        after: endcursor.toString(),
+        after: endCursorRef.current.toString(),
       });
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.log(`Execution time: ${duration} milliseconds`);
-      setMediaAssets((prevMedia) => [...prevMedia, ...media.assets]);
-      setHasNextPage(media.hasNextPage);
-      setEndCursor((pervSate) => pervSate + parseInt(media.endCursor ?? "0"));
+      mediaAssetsRef.current = [...mediaAssetsRef.current, ...media.assets];
+      setMediaAssets([...mediaAssetsRef.current]); // Update state to re-render
+      hasNextPageRef.current = media.hasNextPage;
+      endCursorRef.current += parseInt(media.endCursor ?? "0");
     }
-    setLoading(false);
+    loadingRef.current = false;
   };
 
   const handleLoadMore = () => {
-    console.log({ hasNextPage });
-    if (hasNextPage) {
+    if (hasNextPageRef.current) {
       fetchMedia();
     }
   };
 
   const renderFooter = () => {
-    if (!loading) return null;
+    if (!loadingRef.current) return null;
     return (
       <View style={{ paddingTop: 15 }}>
         <ActivityIndicator size="large" />
@@ -77,18 +69,21 @@ export const GalleryBottomSheet = ({
     <FlatList
       {...props}
       numColumns={3}
-      style={[style]}
+      style={[
+        style,
+        {
+          flexWrap: "wrap",
+        },
+      ]}
       data={mediaAssets}
       scrollEnabled={scrollEnabled}
       keyExtractor={(item) => item.id}
-      // ItemSeparatorComponent={() => <View style={{ height: 2 }} />}
       renderItem={({ index, item, separators }) => (
         <AssetItem index={index} item={item} separators={separators} />
       )}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
-      // Performance settings
       removeClippedSubviews={true} // Unmount components when outside of window
       initialNumToRender={2} // Reduce initial render amount
       maxToRenderPerBatch={1} // Reduce number in each render batch
