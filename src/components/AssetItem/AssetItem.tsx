@@ -8,9 +8,18 @@ import { AssetDuration } from "./Assetduration";
 type Props = ListRenderItemInfo<MediaLibrary.Asset> & {};
 
 export const AssetItem = ({ index, item, separators }: Props) => {
-  if (item.id == "-1") return <VisionCamera />;
   const { width } = useWindowDimensions();
   const itemSize = width / 3 - 5;
+
+  if (item.id == "-1")
+    return (
+      <View
+        style={{
+          width: itemSize,
+          height: itemSize,
+        }}
+      />
+    );
 
   return (
     <TouchableOpacity onPress={() => console.log(item)}>
