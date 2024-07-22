@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  ViewProps,
   useWindowDimensions,
 } from "react-native";
 import { NoCameraErrorView } from "./NoCameraErrorView";
@@ -17,6 +18,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   SharedValue,
+  useAnimatedProps,
 } from "react-native-reanimated";
 import { Portal } from "@gorhom/portal";
 
@@ -38,19 +40,20 @@ export const VisionCamera = ({ animatedPosition }: Props) => {
   };
 
   const { width, height } = useWindowDimensions();
+
   const itemSize = width / 3 - 5;
   const expanded = useSharedValue(false);
-
+  console.log({ animatedPosition });
   const animatedStyle = useAnimatedStyle(() => {
     return {
       width: withTiming(expanded.value ? width : itemSize),
       height: withTiming(expanded.value ? height : itemSize),
       position: "absolute",
-      top: expanded.value ? animatedPosition.value : "auto",
-      left: expanded.value ? 0 : "auto",
-      zIndex: expanded.value ? 999 : 0,
+      top: expanded.value ? 0 + top : animatedPosition.value + 32,
+      left: expanded.value ? 0 : 8,
+      //  zIndex: expanded.value ? 999 : 0,
     };
-  });
+  }, []);
 
   const toggleExpand = () => {
     expanded.value = !expanded.value;
@@ -61,7 +64,7 @@ export const VisionCamera = ({ animatedPosition }: Props) => {
       <Animated.View style={[styles.cameraContainer, animatedStyle]}>
         <TouchableOpacity style={styles.cameraTouchArea} onPress={toggleExpand}>
           <View style={[styles.header, { top: top }]}>
-            <TouchableOpacity onPress={goBack}>
+            <TouchableOpacity onPress={toggleExpand}>
               <IconApp lib="AntDesign" name="close" color="#fff" />
             </TouchableOpacity>
             <VerticalFlashModeCarrousel
