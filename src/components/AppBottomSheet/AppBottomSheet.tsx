@@ -1,4 +1,10 @@
-import React, { useCallback, forwardRef, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  forwardRef,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import {
   StyleSheet,
   useColorScheme,
@@ -14,15 +20,23 @@ import {
   BottomSheetBackdrop,
   BottomSheetHandle,
 } from "@gorhom/bottom-sheet";
-import { BottomSheetButton } from "./BottomSheetButton";
-import { IconApp } from "./IconApp/IconApp";
+import { BottomSheetButton } from "../BottomSheetButton";
+import { IconApp } from "../IconApp/IconApp";
 import { BottomSheetDefaultHandleProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetHandle/types";
 import { Colors } from "@/constants/Colors";
 import { ScrollView } from "react-native-gesture-handler";
 import * as MediaLibrary from "expo-media-library";
-import { GalleryBottomSheet } from "./GalleryBottomSheet";
-import { useSharedValue } from "react-native-reanimated";
-import { VisionCamera } from "./VisionCamera";
+import { GalleryBottomSheet } from "../GalleryBottomSheet";
+import {
+  BounceInDown,
+  BounceInUp,
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  useSharedValue,
+} from "react-native-reanimated";
+import { VisionCamera } from "../VisionCamera";
+import { AnimatedScrollView } from "@/constants/AnimatedComponents";
 
 type Props = {};
 
@@ -32,27 +46,40 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const [scrollOnTop, setScrollOnTop] = useState(true);
   const colorScheme = useColorScheme();
   const animatedPosition = useSharedValue(0);
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    setScrollOnTop(offsetY === 0);
-  };
+  const index = useRef(0);
+  const handleScroll = useCallback(
+    () => (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetY = event.nativeEvent.contentOffset.y;
+      setScrollOnTop(offsetY === 0);
+    },
+    []
+  );
 
   const snapPoints = useMemo(() => ["55%", "90%"], []);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index == 1) {
+  const animatedConfig = {
+    damping: 22,
+    stiffness: 360,
+    velocity: 1,
+  };
+
+  const handleSheetChanges = useCallback((currenIndex: number) => {
+    index.current = currenIndex;
+    if (currenIndex == 1) {
       setBottomFullScreen(true);
     } else {
       setBottomFullScreen(false);
     }
-    console.log("handleSheetChanges", index);
+    console.log("handleSheetChanges", currenIndex);
   }, []);
 
   const FooterComponent = useCallback(
     ({ ...props }: BottomSheetFooterProps) => {
       return (
         <BottomSheetFooter {...props}>
-          <ScrollView
+          <AnimatedScrollView
+            entering={FadeInDown}
+            exiting={FadeOut}
             contentContainerStyle={{
               flexDirection: "row",
               paddingHorizontal: 16,
@@ -138,7 +165,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
                 />
               }
             />
-          </ScrollView>
+          </AnimatedScrollView>
         </BottomSheetFooter>
       );
     },
@@ -183,12 +210,12 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
     },
     []
   );
-
+  console.log("BottomSheetModal render");
   return (
     <BottomSheetModal
       animatedPosition={animatedPosition}
       ref={ref}
-      index={0}
+      index={index.current}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       handleComponent={HandleComponent}
@@ -198,11 +225,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       activeOffsetY={
         bottomFullScreen ? [-999, scrollOnTop ? 0 : 999] : [-15, 15]
       }
-      animationConfigs={{
-        damping: 22,
-        stiffness: 360,
-        velocity: 1,
-      }}
+      animationConfigs={animatedConfig}
     >
       <BottomSheetView
         style={[
