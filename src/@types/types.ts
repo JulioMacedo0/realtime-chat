@@ -52,3 +52,5 @@ export type ContentPhotoPayload = ContentPayload & {
 export type ContentVideoPayload = ContentPayload & {
   content: contentVideo;
 };
+
+export type Channels = "public:chat";
