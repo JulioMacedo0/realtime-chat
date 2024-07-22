@@ -2,7 +2,7 @@ import { TouchableOpacity } from "react-native";
 import { IconApp } from "./IconApp/IconApp";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useCallback, useRef } from "react";
-import { AppBottomSheet } from "./AppBottomSheet";
+import { AppBottomSheet } from "./AppBottomSheet/";
 
 export const PaperClipIcon = () => {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
