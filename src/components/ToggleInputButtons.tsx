@@ -20,7 +20,7 @@ export const ToggleInputButtons = ({ control }: Props) => {
     if (data.user.id == USER_ID) {
       addMessage(newPayload);
     }
-    SendMessageToChannel(newPayload);
+    SendMessageToChannel({ payload: newPayload, channel: "public:chat" });
     control._reset();
   };
 
