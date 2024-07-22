@@ -197,7 +197,6 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
     <BottomSheetModal
       animatedPosition={animatedPosition}
       ref={ref}
-      index={index.current}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       handleComponent={HandleComponent}
