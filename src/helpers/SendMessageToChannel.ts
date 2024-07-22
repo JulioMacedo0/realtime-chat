@@ -1,8 +1,13 @@
-import { ContentPayload } from "@/@types/types";
+import { Channels, ContentPayload } from "@/@types/types";
 import { supabase } from "@/supabase/supabase";
 
-export const SendMessageToChannel = async (payload: ContentPayload) => {
-  const resp = await supabase.channel("public:chat").send({
+type Params = {
+  payload: ContentPayload;
+  channel: Channels;
+};
+
+export const SendMessageToChannel = async ({ payload, channel }: Params) => {
+  const resp = await supabase.channel(channel).send({
     type: "broadcast",
     event: "message",
     payload,
