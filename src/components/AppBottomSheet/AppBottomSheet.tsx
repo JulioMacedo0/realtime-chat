@@ -5,12 +5,7 @@ import React, {
   useState,
   useRef,
 } from "react";
-import {
-  StyleSheet,
-  useColorScheme,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 import {
   BottomSheetBackdropProps,
   BottomSheetFooterProps,
@@ -24,17 +19,9 @@ import { BottomSheetButton } from "../BottomSheetButton";
 import { IconApp } from "../IconApp/IconApp";
 import { BottomSheetDefaultHandleProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetHandle/types";
 import { Colors } from "@/constants/Colors";
-import { ScrollView } from "react-native-gesture-handler";
 import * as MediaLibrary from "expo-media-library";
 import { GalleryBottomSheet } from "../GalleryBottomSheet";
-import {
-  BounceInDown,
-  BounceInUp,
-  FadeIn,
-  FadeInDown,
-  FadeOut,
-  useSharedValue,
-} from "react-native-reanimated";
+import { FadeInDown, FadeOut, useSharedValue } from "react-native-reanimated";
 import { VisionCamera } from "../VisionCamera";
 import { AnimatedScrollView } from "@/constants/AnimatedComponents";
 
@@ -42,18 +29,11 @@ type Props = {};
 
 export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions();
-  const [bottomFullScreen, setBottomFullScreen] = useState(false);
-  const [scrollOnTop, setScrollOnTop] = useState(true);
+  const [showFooterComponent, setShowFooterComponet] = useState(true);
   const colorScheme = useColorScheme();
   const animatedPosition = useSharedValue(0);
   const index = useRef(0);
-  const handleScroll = useCallback(
-    () => (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const offsetY = event.nativeEvent.contentOffset.y;
-      setScrollOnTop(offsetY === 0);
-    },
-    []
-  );
+  const isBottomFullScreen = useRef(false);
 
   const snapPoints = useMemo(() => ["55%", "90%"], []);
 
@@ -66,9 +46,11 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const handleSheetChanges = useCallback((currenIndex: number) => {
     index.current = currenIndex;
     if (currenIndex == 1) {
-      setBottomFullScreen(true);
+      isBottomFullScreen.current = true;
+      setShowFooterComponet(true);
     } else {
-      setBottomFullScreen(false);
+      isBottomFullScreen.current = false;
+      setShowFooterComponet(false);
     }
     console.log("handleSheetChanges", currenIndex);
   }, []);
@@ -210,7 +192,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
     },
     []
   );
-  console.log("BottomSheetModal render");
+
   return (
     <BottomSheetModal
       animatedPosition={animatedPosition}
@@ -220,12 +202,10 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       onChange={handleSheetChanges}
       handleComponent={HandleComponent}
       backdropComponent={BackdropComponent}
-      footerComponent={bottomFullScreen ? undefined : FooterComponent}
+      footerComponent={showFooterComponent ? undefined : FooterComponent}
       activeOffsetX={[-999, 999]}
-      activeOffsetY={
-        bottomFullScreen ? [-999, scrollOnTop ? 0 : 999] : [-15, 15]
-      }
-      animationConfigs={animatedConfig}
+      activeOffsetY={[isBottomFullScreen.current ? -999 : -15, 15]}
+      //animationConfigs={animatedConfig}
     >
       <BottomSheetView
         style={[
@@ -237,8 +217,12 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       >
         <VisionCamera animatedPosition={animatedPosition} />
         <GalleryBottomSheet
-          scrollEnabled={bottomFullScreen}
-          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          bounces={false}
+          alwaysBounceVertical={false}
+          bouncesZoom={false}
+          scrollEnabled={isBottomFullScreen.current}
+          onScroll={(event) => {}}
         />
       </BottomSheetView>
     </BottomSheetModal>
