@@ -24,7 +24,7 @@ export const AssetItem = ({ index, item, separators }: Props) => {
   return (
     <TouchableOpacity onPress={() => console.log(item)}>
       <Image
-        placeholder="'|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj['"
+        placeholder={require("@/assets/images/loading-img.jpg")}
         source={{ uri: item.uri }}
         style={{
           //  borderRadius: 12,
