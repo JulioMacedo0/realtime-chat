@@ -14,7 +14,8 @@ export const GalleryBottomSheet = ({
   ...props
 }: Props) => {
   const mediaAssetsRef = useRef<MediaLibrary.Asset[]>([mediaLibraryAsset]);
-  const loadingRef = useRef(false);
+  const [loading, setLoading] = useState(false);
+
   const hasNextPageRef = useRef(true);
   const endCursorRef = useRef(0);
 
@@ -27,18 +28,19 @@ export const GalleryBottomSheet = ({
   }, []);
 
   const fetchMedia = async () => {
-    if (loadingRef.current || !hasNextPageRef.current) return;
+    if (loading || !hasNextPageRef.current) return;
 
-    loadingRef.current = true;
+    setLoading(true);
     const startTime = performance.now();
     const { status } = await MediaLibrary.requestPermissionsAsync();
     if (status === "granted") {
       const media = await MediaLibrary.getAssetsAsync({
-        first: 32,
+        first: 18,
         sortBy: [MediaLibrary.SortBy.creationTime],
         mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
         after: endCursorRef.current.toString(),
       });
+      console.log(media);
       const endTime = performance.now();
       const duration = endTime - startTime;
       console.log(`Execution time: ${duration} milliseconds`);
@@ -47,7 +49,7 @@ export const GalleryBottomSheet = ({
       hasNextPageRef.current = media.hasNextPage;
       endCursorRef.current += parseInt(media.endCursor ?? "0");
     }
-    loadingRef.current = false;
+    setLoading(false);
   };
 
   const handleLoadMore = () => {
@@ -57,7 +59,7 @@ export const GalleryBottomSheet = ({
   };
 
   const renderFooter = () => {
-    if (!loadingRef.current) return null;
+    if (!loading) return null;
     return (
       <View style={{ paddingTop: 15 }}>
         <ActivityIndicator size="large" />
@@ -82,7 +84,7 @@ export const GalleryBottomSheet = ({
         <AssetItem index={index} item={item} separators={separators} />
       )}
       onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.5}
+      onEndReachedThreshold={0.2}
       ListFooterComponent={renderFooter}
       removeClippedSubviews={true} // Unmount components when outside of window
       initialNumToRender={2} // Reduce initial render amount
