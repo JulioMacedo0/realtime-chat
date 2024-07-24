@@ -6,7 +6,7 @@ export default function Camera() {
   return (
     <SafeAreaView style={styles.container}>
       <ExpoStatusBar style="light" />
-      <VisionCamera />
+      <VisionCamera sizeType="full" />
     </SafeAreaView>
   );
 }
