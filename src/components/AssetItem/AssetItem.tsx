@@ -11,15 +11,7 @@ export const AssetItem = ({ index, item, separators }: Props) => {
   const { width } = useWindowDimensions();
   const itemSize = width / 3 - 5;
 
-  if (item.id == "-1")
-    return (
-      <View
-        style={{
-          width: itemSize,
-          height: itemSize,
-        }}
-      />
-    );
+  if (item.id == "-1") return <VisionCamera sizeType="small" />;
 
   return (
     <TouchableOpacity onPress={() => console.log(item)}>
