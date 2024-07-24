@@ -4,35 +4,29 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  ViewProps,
   useWindowDimensions,
 } from "react-native";
 import { NoCameraErrorView } from "./NoCameraErrorView";
 import { IconApp } from "./IconApp/IconApp";
 import { VerticalFlashModeCarrousel } from "./VerticalFlashModeCarrousel";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { FlashMode } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  SharedValue,
-  useAnimatedProps,
-} from "react-native-reanimated";
-import { Portal } from "@gorhom/portal";
+import Animated, { useSharedValue } from "react-native-reanimated";
+
+import { AbsoluteCenter } from "./AbsoluteCenter";
 
 type Props = {
-  animatedPosition: SharedValue<number>;
+  sizeType: "small" | "full";
 };
-export const VisionCamera = ({ animatedPosition }: Props) => {
+export const VisionCamera = ({ sizeType }: Props) => {
   const device = useCameraDevice("back");
   if (device == null) return <NoCameraErrorView />;
 
   const { top } = useSafeAreaInsets();
   const camera = useRef<Camera>(null);
   const [flashMode, setFlashMode] = useState<FlashMode>("off");
-
+  const navigation = useNavigation();
   const goBack = () => {
     if (router.canGoBack()) {
       router.back();
@@ -43,28 +37,34 @@ export const VisionCamera = ({ animatedPosition }: Props) => {
 
   const itemSize = width / 3 - 5;
   const expanded = useSharedValue(false);
-  console.log({ animatedPosition });
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      width: withTiming(expanded.value ? width : itemSize),
-      height: withTiming(expanded.value ? height : itemSize),
-      position: "absolute",
-      top: expanded.value ? 0 + top : animatedPosition.value + 32,
-      left: expanded.value ? 0 : 8,
-      //  zIndex: expanded.value ? 999 : 0,
-    };
-  }, []);
 
-  const toggleExpand = () => {
-    expanded.value = !expanded.value;
+  const goToCamera = () => {
+    navigation.navigate("camera");
   };
 
   return (
-    <Portal>
-      <Animated.View style={[styles.cameraContainer, animatedStyle]}>
-        <TouchableOpacity style={styles.cameraTouchArea} onPress={toggleExpand}>
+    <Animated.View
+      style={[
+        styles.cameraContainer,
+        {
+          width: sizeType == "full" ? "100%" : itemSize,
+          height: sizeType == "full" ? "100%" : itemSize,
+        },
+      ]}
+    >
+      {sizeType == "small" && (
+        <AbsoluteCenter>
+          <IconApp lib="AntDesign" name="camera" size={35} color="#fff" />
+        </AbsoluteCenter>
+      )}
+      <TouchableOpacity
+        style={styles.cameraTouchArea}
+        activeOpacity={sizeType == "full" ? 1 : 0.7}
+        onPress={sizeType == "full" ? undefined : goToCamera}
+      >
+        {sizeType == "full" && (
           <View style={[styles.header, { top: top }]}>
-            <TouchableOpacity onPress={toggleExpand}>
+            <TouchableOpacity onPress={goBack}>
               <IconApp lib="AntDesign" name="close" color="#fff" />
             </TouchableOpacity>
             <VerticalFlashModeCarrousel
@@ -73,21 +73,21 @@ export const VisionCamera = ({ animatedPosition }: Props) => {
               }}
             />
           </View>
-          <Camera
-            ref={camera}
-            style={styles.camera}
-            device={device}
-            isActive={true}
-          />
-        </TouchableOpacity>
-      </Animated.View>
-    </Portal>
+        )}
+        <Camera
+          ref={camera}
+          style={styles.camera}
+          device={device}
+          isActive={true}
+        />
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   cameraContainer: {
-    zIndex: 1,
+    position: "relative",
   },
   camera: {
     flex: 1,
