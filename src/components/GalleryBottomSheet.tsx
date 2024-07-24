@@ -5,14 +5,11 @@ import { ActivityIndicator, FlatList, FlatListProps, View } from "react-native";
 import { AssetItem } from "./AssetItem";
 import { mediaLibraryAsset } from "@/constants/App";
 
-type Props = Omit<FlatListProps<MediaLibrary.Asset>, "data" | "renderItem"> & {
-  scrollEnabled: boolean;
-};
-export const GalleryBottomSheet = ({
-  style,
-  scrollEnabled,
-  ...props
-}: Props) => {
+type Props = Omit<
+  FlatListProps<MediaLibrary.Asset>,
+  "data" | "renderItem"
+> & {};
+export const GalleryBottomSheet = ({ style, ...props }: Props) => {
   const mediaAssetsRef = useRef<MediaLibrary.Asset[]>([mediaLibraryAsset]);
   const [loading, setLoading] = useState(false);
 
@@ -78,7 +75,6 @@ export const GalleryBottomSheet = ({
         },
       ]}
       data={mediaAssets}
-      scrollEnabled={scrollEnabled}
       keyExtractor={(item) => item.id}
       renderItem={({ index, item, separators }) => (
         <AssetItem index={index} item={item} separators={separators} />
