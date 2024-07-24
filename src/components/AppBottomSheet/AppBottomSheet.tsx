@@ -22,8 +22,9 @@ import { Colors } from "@/constants/Colors";
 import * as MediaLibrary from "expo-media-library";
 import { GalleryBottomSheet } from "../GalleryBottomSheet";
 import { FadeInDown, FadeOut, useSharedValue } from "react-native-reanimated";
-import { VisionCamera } from "../VisionCamera";
+
 import { AnimatedScrollView } from "@/constants/AnimatedComponents";
+import { generateSnapPoints } from "@/helpers/generateSnapPoints";
 
 type Props = {};
 
@@ -32,10 +33,10 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const [showFooterComponent, setShowFooterComponet] = useState(true);
   const colorScheme = useColorScheme();
   const animatedPosition = useSharedValue(0);
-  const index = useRef(0);
+
   const isBottomFullScreen = useRef(false);
 
-  const snapPoints = useMemo(() => ["55%", "90%"], []);
+  const snapPoints = useMemo(() => generateSnapPoints(55, 90, 1), []);
 
   const animatedConfig = {
     damping: 22,
@@ -44,8 +45,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   };
 
   const handleSheetChanges = useCallback((currenIndex: number) => {
-    index.current = currenIndex;
-    if (currenIndex == 1) {
+    if (currenIndex == 35) {
       isBottomFullScreen.current = true;
       setShowFooterComponet(true);
     } else {
@@ -203,8 +203,8 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
       backdropComponent={BackdropComponent}
       footerComponent={showFooterComponent ? undefined : FooterComponent}
       activeOffsetX={[-999, 999]}
-      activeOffsetY={[isBottomFullScreen.current ? -999 : -15, 15]}
-      //animationConfigs={animatedConfig}
+      activeOffsetY={isBottomFullScreen.current ? [-999, 999] : [-15, 15]}
+      // animationConfigs={animatedConfig}
     >
       <BottomSheetView
         style={[
@@ -214,14 +214,13 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
           },
         ]}
       >
-        <VisionCamera animatedPosition={animatedPosition} />
         <GalleryBottomSheet
+          pointerEvents={isBottomFullScreen.current ? "auto" : "none"}
           scrollEventThrottle={16}
           bounces={false}
           alwaysBounceVertical={false}
           bouncesZoom={false}
           scrollEnabled={isBottomFullScreen.current}
-          onScroll={(event) => {}}
         />
       </BottomSheetView>
     </BottomSheetModal>
