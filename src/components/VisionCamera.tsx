@@ -9,11 +9,15 @@ import {
 import { NoCameraErrorView } from "./NoCameraErrorView";
 import { IconApp } from "./IconApp/IconApp";
 import { VerticalFlashModeCarrousel } from "./VerticalFlashModeCarrousel";
-import { router, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { FlashMode } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { useSharedValue } from "react-native-reanimated";
-
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { Portal } from "@gorhom/portal";
 import { AbsoluteCenter } from "./AbsoluteCenter";
 
 type Props = {
@@ -27,68 +31,83 @@ export const VisionCamera = ({ sizeType }: Props) => {
   const camera = useRef<Camera>(null);
   const [flashMode, setFlashMode] = useState<FlashMode>("off");
   const navigation = useNavigation();
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
+  const isExpanded = useSharedValue(false);
+  const [isExpandedState, setIsExpandedState] = useState(false);
+
+  const collapsed = () => {
+    isExpanded.value = false;
+    setIsExpandedState(false);
+    // if (router.canGoBack()) {
+    //   router.back();
+    // }
   };
 
   const { width, height } = useWindowDimensions();
 
   const itemSize = width / 3 - 5;
-  const expanded = useSharedValue(false);
 
-  const goToCamera = () => {
-    navigation.navigate("camera");
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      zIndex: 999,
+      position: isExpanded.value ? "absolute" : "relative",
+      width: withTiming(isExpanded.value ? width : itemSize, { duration: 500 }),
+      height: withTiming(isExpanded.value ? height : itemSize, {
+        duration: 500,
+      }),
+      left: withTiming(isExpanded.value ? 0 : 0, {
+        duration: 500,
+      }),
+      top: withTiming(isExpanded.value ? -70 : 0, {
+        duration: 500,
+      }),
+    };
+  });
+
+  const expanded = () => {
+    isExpanded.value = true;
+    setIsExpandedState(true);
+    //navigation.navigate("camera");
   };
 
   return (
-    <Animated.View
-      style={[
-        styles.cameraContainer,
-        {
-          width: sizeType == "full" ? "100%" : itemSize,
-          height: sizeType == "full" ? "100%" : itemSize,
-        },
-      ]}
-    >
-      {sizeType == "small" && (
-        <AbsoluteCenter>
-          <IconApp lib="AntDesign" name="camera" size={35} color="#fff" />
-        </AbsoluteCenter>
-      )}
-      <TouchableOpacity
-        style={styles.cameraTouchArea}
-        activeOpacity={sizeType == "full" ? 1 : 0.7}
-        onPress={sizeType == "full" ? undefined : goToCamera}
-      >
-        {sizeType == "full" && (
-          <View style={[styles.header, { top: top }]}>
-            <TouchableOpacity onPress={goBack}>
-              <IconApp lib="AntDesign" name="close" color="#fff" />
-            </TouchableOpacity>
-            <VerticalFlashModeCarrousel
-              onChange={(flashmode) => {
-                setFlashMode(flashmode);
-              }}
-            />
-          </View>
+    <View style={{ width: itemSize, height: itemSize }}>
+      <Animated.View style={[styles.cameraContainer, animatedStyle]}>
+        {!isExpandedState && (
+          <AbsoluteCenter>
+            <IconApp lib="AntDesign" name="camera" size={35} color="#fff" />
+          </AbsoluteCenter>
         )}
-        <Camera
-          ref={camera}
-          style={styles.camera}
-          device={device}
-          isActive={true}
-        />
-      </TouchableOpacity>
-    </Animated.View>
+        <TouchableOpacity
+          style={styles.cameraTouchArea}
+          activeOpacity={isExpandedState ? 1 : 0.7}
+          onPress={expanded}
+        >
+          {isExpandedState && (
+            <View style={[styles.header, { top: top }]}>
+              <TouchableOpacity onPress={collapsed}>
+                <IconApp lib="AntDesign" name="close" color="#fff" />
+              </TouchableOpacity>
+              <VerticalFlashModeCarrousel
+                onChange={(flashmode) => {
+                  setFlashMode(flashmode);
+                }}
+              />
+            </View>
+          )}
+          <Camera
+            ref={camera}
+            style={styles.camera}
+            device={device}
+            isActive={true}
+          />
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  cameraContainer: {
-    position: "relative",
-  },
+  cameraContainer: {},
   camera: {
     flex: 1,
   },
