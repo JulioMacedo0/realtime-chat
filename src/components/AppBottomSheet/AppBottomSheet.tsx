@@ -5,7 +5,13 @@ import React, {
   useState,
   useRef,
 } from "react";
-import { StyleSheet, useColorScheme } from "react-native";
+import {
+  StyleSheet,
+  useColorScheme,
+  View,
+  Text,
+  useWindowDimensions,
+} from "react-native";
 import {
   BottomSheetBackdropProps,
   BottomSheetFooterProps,
@@ -22,9 +28,12 @@ import { Colors } from "@/constants/Colors";
 import * as MediaLibrary from "expo-media-library";
 import { GalleryBottomSheet } from "../GalleryBottomSheet";
 import { FadeInDown, FadeOut, useSharedValue } from "react-native-reanimated";
-
+import {} from "expo-router";
 import { AnimatedScrollView } from "@/constants/AnimatedComponents";
 import { generateSnapPoints } from "@/helpers/generateSnapPoints";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HandleComponent } from "./HandleComponent";
 
 type Props = {};
 
@@ -33,10 +42,10 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   const [showFooterComponent, setShowFooterComponet] = useState(true);
   const colorScheme = useColorScheme();
   const animatedPosition = useSharedValue(0);
-
+  const { height } = useWindowDimensions();
   const isBottomFullScreen = useRef(false);
 
-  const snapPoints = useMemo(() => generateSnapPoints(55, 90, 1), []);
+  const snapPoints = useMemo(() => ["55%", "90%"], []);
 
   const animatedConfig = {
     damping: 22,
@@ -45,7 +54,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
   };
 
   const handleSheetChanges = useCallback((currenIndex: number) => {
-    if (currenIndex == 35) {
+    if (currenIndex == 1) {
       isBottomFullScreen.current = true;
       setShowFooterComponet(true);
     } else {
@@ -153,30 +162,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
     },
     [colorScheme]
   );
-  const HandleComponent = useCallback(
-    ({ style, indicatorStyle, ...props }: BottomSheetDefaultHandleProps) => {
-      return (
-        <BottomSheetHandle
-          {...props}
-          style={[
-            style,
-            {
-              backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
-              borderTopLeftRadius: 15,
-              borderTopRightRadius: 15,
-            },
-          ]}
-          indicatorStyle={[
-            indicatorStyle,
-            {
-              backgroundColor: Colors[colorScheme ?? "light"].background,
-            },
-          ]}
-        />
-      );
-    },
-    [colorScheme]
-  );
+
   const BackdropComponent = useCallback(
     ({ style, ...props }: BottomSheetBackdropProps) => {
       return (
@@ -192,18 +178,21 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
     },
     []
   );
-
+  const headerHeight = useHeaderHeight();
   return (
     <BottomSheetModal
       animatedPosition={animatedPosition}
       ref={ref}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
-      handleComponent={HandleComponent}
+      handleComponent={(props) => (
+        <HandleComponent headerHeight={headerHeight} ref={ref} {...props} />
+      )}
       backdropComponent={BackdropComponent}
       footerComponent={showFooterComponent ? undefined : FooterComponent}
       activeOffsetX={[-999, 999]}
-      activeOffsetY={isBottomFullScreen.current ? [-999, 999] : [-15, 15]}
+      activeOffsetY={[-15, 15]}
+
       // animationConfigs={animatedConfig}
     >
       <BottomSheetView
@@ -215,12 +204,13 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
         ]}
       >
         <GalleryBottomSheet
-          pointerEvents={isBottomFullScreen.current ? "auto" : "none"}
+          //pointerEvents={isBottomFullScreen.current ? "auto" : "none"}
+
           scrollEventThrottle={16}
           bounces={false}
           alwaysBounceVertical={false}
           bouncesZoom={false}
-          scrollEnabled={isBottomFullScreen.current}
+          scrollEnabled={false}
         />
       </BottomSheetView>
     </BottomSheetModal>
