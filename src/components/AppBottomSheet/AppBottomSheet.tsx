@@ -195,24 +195,7 @@ export const AppBottomSheet = forwardRef<BottomSheetModal, Props>(({}, ref) => {
 
       // animationConfigs={animatedConfig}
     >
-      <BottomSheetView
-        style={[
-          styles.contentContainer,
-          {
-            backgroundColor: Colors[colorScheme ?? "light"].headerBackground,
-          },
-        ]}
-      >
-        <GalleryBottomSheet
-          //pointerEvents={isBottomFullScreen.current ? "auto" : "none"}
-
-          scrollEventThrottle={16}
-          bounces={false}
-          alwaysBounceVertical={false}
-          bouncesZoom={false}
-          scrollEnabled={false}
-        />
-      </BottomSheetView>
+      <GalleryBottomSheet />
     </BottomSheetModal>
   );
 });
