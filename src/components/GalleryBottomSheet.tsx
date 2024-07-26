@@ -4,6 +4,8 @@ import { ActivityIndicator, FlatList, FlatListProps, View } from "react-native";
 
 import { AssetItem } from "./AssetItem";
 import { mediaLibraryAsset } from "@/constants/App";
+import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { keyExtractorId } from "@/helpers/keyExtractorId";
 
 type Props = Omit<
   FlatListProps<MediaLibrary.Asset>,
@@ -65,7 +67,7 @@ export const GalleryBottomSheet = ({ style, ...props }: Props) => {
   };
 
   return (
-    <FlatList
+    <BottomSheetFlatList
       {...props}
       numColumns={3}
       style={[
@@ -75,18 +77,20 @@ export const GalleryBottomSheet = ({ style, ...props }: Props) => {
         },
       ]}
       data={mediaAssets}
-      keyExtractor={(item) => item.id}
+      keyExtractor={keyExtractorId}
       renderItem={({ index, item, separators }) => (
         <AssetItem index={index} item={item} separators={separators} />
       )}
       onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.2}
+      onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
-      removeClippedSubviews={true} // Unmount components when outside of window
-      initialNumToRender={2} // Reduce initial render amount
-      maxToRenderPerBatch={1} // Reduce number in each render batch
-      updateCellsBatchingPeriod={100} // Increase time between renders
-      windowSize={7} // Reduce the window size
+      bounces={true}
+      //perfomance props
+      initialNumToRender={5}
+      windowSize={10}
+      maxToRenderPerBatch={5}
+      removeClippedSubviews={true}
+      updateCellsBatchingPeriod={100}
     />
   );
 };
