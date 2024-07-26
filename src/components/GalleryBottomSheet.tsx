@@ -86,6 +86,7 @@ export const GalleryBottomSheet = ({ style, ...props }: Props) => {
       ListFooterComponent={renderFooter}
       bounces={true}
       //perfomance props
+
       initialNumToRender={5}
       windowSize={10}
       maxToRenderPerBatch={5}
